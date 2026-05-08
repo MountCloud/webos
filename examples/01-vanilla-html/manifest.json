@@ -1,0 +1,28 @@
+{
+  "appId": "example-vanilla-html",
+  "name": "Vanilla HTML 示例",
+  "version": "0.1.0",
+  "vendor": "MountCloud",
+  "description": "不用构建工具，纯 HTML + CDN UMD 接入 webos 的最简示例",
+  "icon": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%232c5282'/><text x='32' y='44' font-size='32' text-anchor='middle' fill='%23fff' font-family='sans-serif'>📄</text></svg>",
+  "category": "example",
+  "tags": ["example", "vanilla", "html"],
+  "entries": [
+    {
+      "id": "main",
+      "name": "Vanilla HTML 示例",
+      "icon": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%232c5282'/><text x='32' y='44' font-size='32' text-anchor='middle' fill='%23fff' font-family='sans-serif'>📄</text></svg>",
+      "uri": "/examples/01-vanilla-html/index.html",
+      "defaultWindow": {
+        "width": 720,
+        "height": 540,
+        "resizable": true,
+        "minWidth": 480,
+        "minHeight": 360
+      },
+      "permissions": ["notify", "dialog", "window", "theme", "apps", "events", "message"],
+      "showIn": ["desktop", "start-menu"],
+      "order": 100
+    }
+  ]
+}

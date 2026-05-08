@@ -1,0 +1,253 @@
+// 对话框 + 通知 + 上下文菜单
+// @author MountCloud <mountcloud@outlook.com>
+
+// ===== 对话框（Alert / Confirm / Prompt / 自定义按钮）=====
+.webos-alert,
+.webos-prompt {
+  .webos-window-body {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+}
+
+.webos-dialog {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.webos-dialog-content {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--webos-spacing-lg);
+  padding: var(--webos-spacing-xl) var(--webos-spacing-xl) var(--webos-spacing-lg);
+  overflow: auto;
+  min-height: 0;
+}
+
+.webos-dialog-icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  line-height: 1;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+.webos-dialog-message-wrap {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--webos-spacing-md);
+  align-self: center;
+}
+
+.webos-dialog-message {
+  font-size: var(--webos-font-size-md);
+  line-height: 1.6;
+  color: var(--webos-color-text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.webos-dialog-error {
+  font-size: var(--webos-font-size-sm);
+  color: var(--webos-color-danger);
+  line-height: 1.4;
+}
+
+.webos-dialog-footer {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--webos-spacing-sm);
+  padding: var(--webos-spacing-md) var(--webos-spacing-xl);
+  border-top: 1px solid var(--webos-color-border);
+  background: var(--webos-color-bg-glass);
+}
+
+// 通知容器（右上角浮动栈）
+.webos-notification-container {
+  position: fixed;
+  top: var(--webos-spacing-lg);
+  right: var(--webos-spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--webos-spacing-sm);
+  z-index: var(--webos-z-notification);
+  pointer-events: none;
+  max-width: 360px;
+}
+
+.webos-notification {
+  pointer-events: auto;
+  position: relative;
+  background: var(--webos-color-bg-glass-strong);
+  backdrop-filter: blur(var(--webos-blur));
+  -webkit-backdrop-filter: blur(var(--webos-blur));
+  border: 1px solid var(--webos-color-border);
+  border-radius: var(--webos-radius-lg);
+  padding: var(--webos-spacing-md) var(--webos-spacing-lg);
+  padding-right: 32px;
+  box-shadow: var(--webos-shadow-notification);
+  opacity: 0;
+  transform: translateX(120%);
+  transition:
+    opacity var(--webos-transition-normal),
+    transform var(--webos-transition-normal);
+  border-left: 4px solid var(--webos-color-info);
+
+  &--shown {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  &--success { border-left-color: var(--webos-color-success); }
+  &--warning { border-left-color: var(--webos-color-warning); }
+  &--critical { border-left-color: var(--webos-color-danger); }
+}
+
+.webos-notification-title {
+  font-size: var(--webos-font-size-md);
+  font-weight: 600;
+  color: var(--webos-color-text);
+  margin-bottom: 2px;
+}
+
+.webos-notification-message {
+  font-size: var(--webos-font-size-base);
+  color: var(--webos-color-text-muted);
+  line-height: 1.5;
+}
+
+.webos-notification-actions {
+  display: flex;
+  gap: var(--webos-spacing-sm);
+  margin-top: var(--webos-spacing-sm);
+}
+
+.webos-notification-close {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--webos-color-text-muted);
+  border-radius: var(--webos-radius-sm);
+  background: transparent;
+  transition: background var(--webos-transition-fast), color var(--webos-transition-fast);
+
+  > svg {
+    width: 10px;
+    height: 10px;
+    shape-rendering: geometricPrecision;
+    pointer-events: none;
+  }
+
+  &:hover {
+    background: var(--webos-color-hover);
+    color: var(--webos-color-text);
+  }
+}
+
+// 上下文菜单
+.webos-context-menu {
+  position: fixed;
+  background: var(--webos-color-bg-glass-strong);
+  backdrop-filter: blur(var(--webos-blur));
+  -webkit-backdrop-filter: blur(var(--webos-blur));
+  border: 1px solid var(--webos-color-border);
+  border-radius: var(--webos-radius-md);
+  box-shadow: var(--webos-shadow-popover);
+  padding: 4px 0;
+  min-width: 180px;
+  z-index: var(--webos-z-popover);
+  user-select: none;
+}
+
+.webos-context-menu-item {
+  display: flex;
+  align-items: center;
+  padding: 6px var(--webos-spacing-md);
+  font-size: var(--webos-font-size-base);
+  color: var(--webos-color-text);
+  cursor: pointer;
+
+  &:hover {
+    background: var(--webos-color-hover);
+  }
+
+  &--disabled {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  &--danger {
+    color: var(--webos-color-danger);
+  }
+}
+
+.webos-context-menu-item-icon {
+  display: inline-flex;
+  width: 20px;
+  margin-right: var(--webos-spacing-sm);
+  font-size: 14px;
+}
+
+.webos-context-menu-item-label {
+  flex: 1;
+}
+
+.webos-context-menu-item-shortcut {
+  font-size: var(--webos-font-size-xs);
+  color: var(--webos-color-text-muted);
+  margin-left: var(--webos-spacing-md);
+}
+
+.webos-context-menu-divider {
+  height: 1px;
+  background: var(--webos-color-border);
+  margin: 4px 0;
+}
+
+// 子菜单
+.webos-context-menu-item--has-children {
+  position: relative;
+
+  > .webos-context-menu-item-label::after {
+    content: '▶';
+    margin-left: var(--webos-spacing-md);
+    font-size: 9px;
+    opacity: 0.55;
+  }
+
+  &:hover > .webos-context-menu--submenu {
+    display: block;
+  }
+}
+
+.webos-context-menu--submenu {
+  position: absolute;
+  // 覆盖外层 .webos-context-menu 的 fixed 定位
+  left: calc(100% - 2px);
+  top: -4px;
+  display: none;
+  // 鼠标移过缝隙不会瞬间收起
+  margin-left: 0;
+}

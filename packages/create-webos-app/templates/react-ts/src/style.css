@@ -1,0 +1,10 @@
+* { box-sizing: border-box; }
+body { margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; }
+.app { min-height: 100vh; padding: 24px; background: var(--bg, #f5f7fa); color: var(--fg, #1a202c); }
+.app.theme-dark { --bg: #1a202c; --fg: #f7fafc; }
+header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+h1 { margin: 0; font-size: 22px; }
+.meta { color: #718096; font-size: 13px; }
+.actions { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+button { padding: 8px 16px; background: #2c5282; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; }
+button:hover { background: #2a4d75; }

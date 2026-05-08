@@ -1,0 +1,122 @@
+// 左 / 右上角浮动胶囊
+// @author MountCloud <mountcloud@outlook.com>
+
+.webos-top-left,
+.webos-top-right {
+  position: fixed;
+  top: var(--webos-top-bar-margin);
+  display: flex;
+  align-items: stretch;
+  height: var(--webos-top-bar-height);
+  background: var(--webos-color-bg-glass);
+  backdrop-filter: blur(var(--webos-blur-strong));
+  -webkit-backdrop-filter: blur(var(--webos-blur-strong));
+  border: 1px solid var(--webos-color-border);
+  border-radius: 10px;
+  box-shadow: 0 4px 14px var(--webos-color-shadow);
+  z-index: var(--webos-z-taskbar);
+  user-select: none;
+  overflow: hidden;
+}
+
+.webos-top-left {
+  left: var(--webos-top-bar-margin);
+}
+
+.webos-top-right {
+  right: var(--webos-top-bar-margin);
+}
+
+// ===== 左：显示桌面（细条） + 主菜单 =====
+.webos-top-left-show-desktop {
+  width: 24px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: var(--webos-color-text-muted);
+  cursor: pointer;
+  transition: background var(--webos-transition-fast), color var(--webos-transition-fast);
+  border-right: 1px solid var(--webos-color-border);
+
+  &:hover {
+    background: var(--webos-color-hover);
+    color: var(--webos-color-text);
+  }
+
+  &:active {
+    background: var(--webos-color-active);
+  }
+}
+
+.webos-top-left-menu {
+  width: 44px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: var(--webos-color-text);
+  cursor: pointer;
+  transition: background var(--webos-transition-fast);
+
+  &:hover {
+    background: var(--webos-color-hover);
+  }
+
+  &:active {
+    background: var(--webos-color-active);
+  }
+}
+
+// ===== 右：4 个工具按钮 =====
+.webos-top-right-btn {
+  position: relative;
+  width: 40px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  color: var(--webos-color-text-muted);
+  cursor: pointer;
+  transition: background var(--webos-transition-fast), color var(--webos-transition-fast);
+  border-right: 1px solid var(--webos-color-border);
+
+  &:last-child {
+    border-right: none;
+  }
+
+  &:hover {
+    background: var(--webos-color-hover);
+    color: var(--webos-color-text);
+  }
+
+  &:active {
+    background: var(--webos-color-active);
+  }
+
+  > svg {
+    width: 18px;
+    height: 18px;
+    pointer-events: none;
+  }
+}
+
+.webos-top-right-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 3px;
+  background: var(--webos-color-danger);
+  color: var(--webos-color-text-inverse);
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 14px;
+  text-align: center;
+  border-radius: 7px;
+  pointer-events: none;
+}

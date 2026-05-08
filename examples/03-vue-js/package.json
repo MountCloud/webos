@@ -1,0 +1,21 @@
+{
+  "name": "example-vue-js",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "license": "MIT",
+  "author": "MountCloud <mountcloud@outlook.com>",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@webos/host-sdk": "workspace:*",
+    "vue": "^3.5.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.1.0",
+    "vite": "^5.4.0"
+  }
+}

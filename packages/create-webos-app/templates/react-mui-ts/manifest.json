@@ -1,0 +1,21 @@
+{
+  "appId": "__APP_ID__",
+  "name": "__DISPLAY_NAME__",
+  "version": "0.1.0",
+  "icon": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%231a202c'/><text x='32' y='44' font-size='28' text-anchor='middle' fill='%2361dafb' font-family='sans-serif'>R</text></svg>",
+  "entries": [
+    {
+      "id": "main",
+      "name": "__DISPLAY_NAME__",
+      "icon": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%231a202c'/><text x='32' y='44' font-size='28' text-anchor='middle' fill='%2361dafb' font-family='sans-serif'>R</text></svg>",
+      "uri": "http://localhost:5173/",
+      "defaultWindow": {
+        "width": 800,
+        "height": 600,
+        "resizable": true
+      },
+      "showIn": ["desktop", "start-menu"],
+      "permissions": ["notify", "dialog", "window", "user.read"]
+    }
+  ]
+}

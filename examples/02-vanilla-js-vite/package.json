@@ -1,0 +1,19 @@
+{
+  "name": "example-vanilla-js-vite",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "license": "MIT",
+  "author": "MountCloud <mountcloud@outlook.com>",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@webos/host-sdk": "workspace:*"
+  },
+  "devDependencies": {
+    "vite": "^5.4.0"
+  }
+}

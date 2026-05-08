@@ -1,0 +1,25 @@
+{
+  "appId": "example-vanilla-js-vite",
+  "name": "Vanilla JS 示例",
+  "version": "0.1.0",
+  "vendor": "MountCloud",
+  "description": "Vite 打包 + ESM 导入 SDK 的零框架示例",
+  "icon": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%23dd6b20'/><text x='32' y='44' font-size='32' text-anchor='middle' fill='%23fff' font-family='sans-serif'>📦</text></svg>",
+  "category": "example",
+  "tags": ["example", "vanilla", "vite"],
+  "entries": [
+    {
+      "id": "main",
+      "name": "Vanilla JS 示例",
+      "icon": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%23dd6b20'/><text x='32' y='44' font-size='32' text-anchor='middle' fill='%23fff' font-family='sans-serif'>📦</text></svg>",
+      "uri": "http://localhost:5501/",
+      "defaultWindow": {
+        "width": 720,
+        "height": 540,
+        "resizable": true
+      },
+      "showIn": ["desktop", "start-menu"],
+      "order": 110
+    }
+  ]
+}

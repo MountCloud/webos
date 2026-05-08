@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>扩展点宿主示例</title>
+  <script src="/packages/host-sdk/dist/host-sdk.umd.js"></script>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f7fafc;
+      --panel: #ffffff;
+      --text: #1a202c;
+      --text-soft: #4a5568;
+      --border: #e2e8f0;
+      --accent: #805ad5;
+      --accent-soft: #ede9fe;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1a202c;
+        --panel: #2d3748;
+        --text: #f7fafc;
+        --text-soft: #cbd5e0;
+        --border: #4a5568;
+        --accent-soft: #44337a;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    h1 { margin: 0 0 4px; font-size: 22px; }
+    .subtitle { margin: 0 0 20px; color: var(--text-soft); font-size: 13px; }
+    .slot-label {
+      display: inline-block;
+      padding: 2px 8px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-radius: 4px;
+      font-family: ui-monospace, "SF Mono", Consolas, monospace;
+      font-size: 12px;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+    .panel-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin: 0 0 12px;
+      color: var(--text-soft);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .empty {
+      color: var(--text-soft);
+      font-size: 13px;
+      padding: 24px 0;
+      text-align: center;
+    }
+    .ext-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px;
+    }
+    .ext-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      cursor: pointer;
+      transition: border-color 0.15s, transform 0.05s;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .ext-card:hover { border-color: var(--accent); }
+    .ext-card:active { transform: translateY(1px); }
+    .ext-card-head { display: flex; align-items: center; gap: 8px; }
+    .ext-card-icon { width: 28px; height: 28px; border-radius: 6px; }
+    .ext-card-label { font-weight: 600; font-size: 14px; }
+    .ext-card-from {
+      font-size: 11px;
+      color: var(--text-soft);
+      font-family: ui-monospace, monospace;
+    }
+    .ext-card-desc {
+      font-size: 12px;
+      color: var(--text-soft);
+      margin-top: 4px;
+    }
+    button.refresh {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 12px;
+      cursor: pointer;
+      font-size: 12px;
+      float: right;
+    }
+    button.refresh:hover { opacity: 0.9; }
+    pre.debug {
+      background: #1a202c;
+      color: #f7fafc;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      max-height: 160px;
+      overflow: auto;
+      margin: 12px 0 0;
+      font-family: ui-monospace, "SF Mono", Consolas, monospace;
+    }
+  </style>
+</head>
+<body>
+  <h1>🧩 扩展点宿主示例</h1>
+  <p class="subtitle">本应用声明了一个扩展槽 <span class="slot-label">settings.tabs</span> · 任何应用都可以通过 manifest <code>contributes.extensionPoints</code> 把自己挂进来</p>
+
+  <div class="panel">
+    <button class="refresh" id="btn-refresh">刷新</button>
+    <div class="panel-title">已注册的扩展项</div>
+    <div id="ext-list" class="ext-list"></div>
+    <pre class="debug" id="debug">[等待加载]</pre>
+  </div>
+
+  <script>
+    const HOST = 'example-extensible-host'
+    const SLOT = 'settings.tabs'
+
+    const listEl = document.getElementById('ext-list')
+    const debugEl = document.getElementById('debug')
+    const btnRefresh = document.getElementById('btn-refresh')
+
+    function log(msg) {
+      const ts = new Date().toLocaleTimeString()
+      debugEl.textContent = `[${ts}] ${msg}\n` + debugEl.textContent
+    }
+
+    async function loadExtensions() {
+      listEl.innerHTML = ''
+      try {
+        const exts = await window.Webos.contributes.list({ host: HOST, slot: SLOT })
+        log(`contributes.list 返回 ${exts.length} 项`)
+
+        if (exts.length === 0) {
+          const empty = document.createElement('div')
+          empty.className = 'empty'
+          empty.textContent = '没有应用声明扩展到 settings.tabs · 试试启动「扩展点插件示例」应用'
+          listEl.appendChild(empty)
+          return
+        }
+
+        for (const ext of exts) {
+          const card = document.createElement('div')
+          card.className = 'ext-card'
+
+          const head = document.createElement('div')
+          head.className = 'ext-card-head'
+          if (ext.icon) {
+            const img = document.createElement('img')
+            img.className = 'ext-card-icon'
+            img.src = ext.icon
+            img.alt = ''
+            head.appendChild(img)
+          }
+          const label = document.createElement('div')
+          label.className = 'ext-card-label'
+          label.textContent = ext.label
+          head.appendChild(label)
+          card.appendChild(head)
+
+          const from = document.createElement('div')
+          from.className = 'ext-card-from'
+          from.textContent = `来自：${ext.appName} (${ext.appId})`
+          card.appendChild(from)
+
+          if (ext.description) {
+            const desc = document.createElement('div')
+            desc.className = 'ext-card-desc'
+            desc.textContent = ext.description
+            card.appendChild(desc)
+          }
+
+          card.addEventListener('click', async () => {
+            log(`打开扩展：${ext.appId} / ${ext.entryId}（解析后 URL: ${ext.uri}）`)
+            try {
+              // contributes 返回的是已解析后的完整 URL；把它的查询串透传给 apps.open
+              // 让插件启动时能拿到正确的 view（避开"宿主只知道 URI、apps.open 只吃 entryId/feature/params"的鸿沟）
+              const params = {}
+              try {
+                const u = new URL(ext.uri, location.origin)
+                u.searchParams.forEach((v, k) => { params[k] = v })
+              } catch (_) { /* 绝对 URL 解析失败时忽略，按 entry 默认 URL 启动 */ }
+              await window.Webos.apps.open(ext.appId, {
+                entryId: ext.entryId,
+                params,
+              })
+            } catch (e) {
+              window.Webos.dialog.alert({
+                title: '打开失败',
+                message: String(e && e.message ? e.message : e),
+              })
+            }
+          })
+
+          listEl.appendChild(card)
+        }
+      } catch (e) {
+        log('contributes.list 出错：' + (e && e.message ? e.message : e))
+      }
+    }
+
+    btnRefresh.addEventListener('click', () => {
+      log('手动刷新')
+      void loadExtensions()
+    })
+
+    void loadExtensions()
+  </script>
+</body>
+</html>

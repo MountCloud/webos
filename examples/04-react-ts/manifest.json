@@ -1,0 +1,25 @@
+{
+  "appId": "example-react-ts",
+  "name": "React + TS 示例",
+  "version": "0.1.0",
+  "vendor": "MountCloud",
+  "description": "React 18 + TypeScript + Vite 接入 webos 的示例",
+  "icon": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%231a202c'/><text x='32' y='44' font-size='32' text-anchor='middle' fill='%2361dafb' font-family='sans-serif'>⚛</text></svg>",
+  "category": "example",
+  "tags": ["example", "react", "typescript"],
+  "entries": [
+    {
+      "id": "main",
+      "name": "React + TS 示例",
+      "icon": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%231a202c'/><text x='32' y='44' font-size='32' text-anchor='middle' fill='%2361dafb' font-family='sans-serif'>⚛</text></svg>",
+      "uri": "http://localhost:5503/",
+      "defaultWindow": {
+        "width": 800,
+        "height": 600,
+        "resizable": true
+      },
+      "showIn": ["desktop", "start-menu"],
+      "order": 130
+    }
+  ]
+}

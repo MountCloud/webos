@@ -1,0 +1,31 @@
+{
+  "name": "@webos/shell",
+  "version": "0.1.0",
+  "description": "webos 桌面壳",
+  "author": "MountCloud <mountcloud@outlook.com>",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "lint": "eslint src --ext .ts,.tsx",
+    "clean": "rm -rf dist .vite"
+  },
+  "dependencies": {
+    "@webos/host-sdk": "workspace:*",
+    "interactjs": "^1.10.27",
+    "@viselect/vanilla": "^3.9.0",
+    "mitt": "^3.0.1",
+    "he": "^1.2.0",
+    "dayjs": "^1.11.10",
+    "qrcode": "^1.5.3"
+  },
+  "devDependencies": {
+    "vite": "^5.2.0",
+    "typescript": "^5.4.0",
+    "sass": "^1.75.0",
+    "@types/he": "^1.2.3",
+    "@types/qrcode": "^1.5.5"
+  }
+}

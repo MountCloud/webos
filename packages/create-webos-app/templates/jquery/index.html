@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>__DISPLAY_NAME__</title>
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@webos/host-sdk/dist/host-sdk.umd.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 24px; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: #fdf6e3; }
+    h1 { margin: 0 0 16px; font-size: 22px; }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+    button { padding: 8px 16px; background: #d69e2e; color: #1a202c; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; }
+    button:hover { background: #b7791f; color: #fff; }
+    pre { background: #1a202c; color: #f6e05e; padding: 12px; border-radius: 6px; font-size: 12px; max-height: 220px; overflow: auto; margin-top: 16px; }
+  </style>
+</head>
+<body>
+  <h1>__DISPLAY_NAME__</h1>
+  <p>这是一个由 <code>create-webos-app</code> 生成的 jQuery + UMD 应用（老项目无痛接入示例）。</p>
+  <div class="actions">
+    <button data-act="notify">弹通知</button>
+    <button data-act="confirm">Confirm</button>
+    <button data-act="close">关闭窗口</button>
+  </div>
+  <pre id="log">[等待操作]</pre>
+
+  <script>
+    (function ($, webos) {
+      function log(msg) {
+        var t = '[' + new Date().toLocaleTimeString() + '] ' + msg + '\n'
+        $('#log').text(t + $('#log').text())
+      }
+      var actions = {
+        notify: function () { webos.notify({ title: 'Hello', level: 'success' }); log('已弹通知') },
+        confirm: function () {
+          return webos.dialog.confirm('确认操作？').then(function (r) { log('confirm: ' + r) })
+        },
+        close: function () { webos.window.close() }
+      }
+      $(function () {
+        $('button[data-act]').on('click', function () {
+          var fn = actions[$(this).data('act')]
+          if (fn) {
+            try {
+              var r = fn()
+              if (r && r.catch) r.catch(function (err) { log('错误: ' + (err && err.message || err)) })
+            } catch (err) { log('错误: ' + (err && err.message || err)) }
+          }
+        })
+        log('jQuery ' + $.fn.jquery + ' + webos SDK 已就绪')
+      })
+    })(window.jQuery, window.Webos)
+  </script>
+</body>
+</html>

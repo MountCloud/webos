@@ -1,0 +1,28 @@
+{
+  "appId": "example-extensible-host",
+  "name": "扩展点宿主示例",
+  "version": "0.1.0",
+  "vendor": "MountCloud",
+  "description": "演示 contributes 扩展点：当前应用声明一个 slot，用 Webos.contributes.list 把其他应用注册的扩展项渲染出来",
+  "icon": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%23805ad5'/><text x='32' y='44' font-size='32' text-anchor='middle' fill='%23fff' font-family='sans-serif'>🧩</text></svg>",
+  "category": "example",
+  "tags": ["example", "contributes", "extension"],
+  "entries": [
+    {
+      "id": "main",
+      "name": "扩展点宿主",
+      "icon": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%23805ad5'/><text x='32' y='44' font-size='32' text-anchor='middle' fill='%23fff' font-family='sans-serif'>🧩</text></svg>",
+      "uri": "/examples/07-extensible-host/index.html",
+      "defaultWindow": {
+        "width": 720,
+        "height": 560,
+        "resizable": true,
+        "minWidth": 520,
+        "minHeight": 400
+      },
+      "showIn": ["desktop", "start-menu"],
+      "order": 300,
+      "permissions": ["notify", "dialog", "window", "apps", "events"]
+    }
+  ]
+}

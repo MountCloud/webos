@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>示例 01 - Vanilla HTML</title>
+
+  <!-- 把 SDK 当 UMD 引：发布后建议换成 jsDelivr / unpkg CDN -->
+  <!-- <script src="https://cdn.jsdelivr.net/npm/@webos/host-sdk/dist/host-sdk.umd.js"></script> -->
+  <script src="../../packages/host-sdk/dist/host-sdk.umd.js"></script>
+
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+      background: #f5f7fa;
+      color: #1a202c;
+      line-height: 1.6;
+    }
+    h1 { margin: 0 0 8px; font-size: 22px; }
+    .subtitle { color: #718096; font-size: 13px; margin-bottom: 20px; }
+    .card {
+      background: #fff;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    .card h2 { margin: 0 0 12px; font-size: 14px; color: #2c5282; }
+    button {
+      padding: 8px 14px;
+      margin: 4px 6px 4px 0;
+      background: #2c5282;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: background 0.15s;
+    }
+    button:hover { background: #2a4d75; }
+    button.danger { background: #c53030; }
+    button.danger:hover { background: #9b2c2c; }
+    pre {
+      background: #1a202c;
+      color: #cbd5e0;
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      max-height: 220px;
+      overflow: auto;
+      margin: 0;
+      font-family: "Consolas", "Monaco", monospace;
+    }
+    code {
+      background: #edf2f7;
+      padding: 1px 6px;
+      border-radius: 3px;
+      font-family: "Consolas", monospace;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <h1>📄 Vanilla HTML 示例</h1>
+  <p class="subtitle">不用任何构建工具，纯 HTML + CDN 引 UMD 包就能接入 webos。</p>
+
+  <div class="card">
+    <h2>通知 / 对话框</h2>
+    <button onclick="demoNotify()">普通通知</button>
+    <button onclick="demoSuccess()">成功通知</button>
+    <button onclick="demoWarning()">警告通知</button>
+    <button class="danger" onclick="demoCritical()">危险告警</button>
+    <button onclick="demoAlert()">Alert</button>
+    <button onclick="demoConfirm()">Confirm</button>
+    <button onclick="demoPrompt()">Prompt</button>
+  </div>
+
+  <div class="card">
+    <h2>窗口控制</h2>
+    <button onclick="demoSetTitle()">改窗口标题</button>
+    <button onclick="demoMinimize()">最小化</button>
+    <button onclick="demoSetBusy()">显示/隐藏忙碌指示</button>
+    <button class="danger" onclick="demoClose()">关闭自己</button>
+  </div>
+
+  <div class="card">
+    <h2>系统 / 应用</h2>
+    <button onclick="demoSystemInfo()">读 system.info</button>
+    <button onclick="demoListApps()">列出已注册应用</button>
+    <button onclick="demoTheme()">读当前主题</button>
+    <button onclick="demoToggleTheme()">切换主题</button>
+  </div>
+
+  <div class="card">
+    <h2>跨应用消息 / 全局事件</h2>
+    <button onclick="demoBroadcast()">发全局事件 ping</button>
+    <button onclick="demoSendMessage()">给 sdk-demo 发消息</button>
+  </div>
+
+  <div class="card">
+    <h2>调用日志</h2>
+    <pre id="log">[等待操作]</pre>
+  </div>
+
+  <script>
+    // UMD 把 Webos 暴露在 window 上
+    var webos = window.Webos;
+
+    // 启动时打印一下，方便确认 SDK 加载成功
+    log("SDK 已加载，模块清单：" + Object.keys(webos).filter(function (k) { return typeof webos[k] !== "function" || ["notify","contextMenu","download","upload","requestPermission","configure"].indexOf(k) === -1; }).join(", "));
+
+    // 监听全局事件示例
+    webos.events.on("ping", function (payload) {
+      log("收到全局事件 ping：" + JSON.stringify(payload));
+    });
+
+    // 监听跨应用消息
+    webos.message.on(function (msg, fromAppId) {
+      log("收到来自 " + fromAppId + " 的消息：" + JSON.stringify(msg));
+    });
+
+    // 监听主题变化
+    webos.theme.on("change", function (theme) {
+      log("主题变更为：" + theme);
+    });
+
+    function demoNotify() {
+      webos.notify({ title: "Hello", message: "这是一条普通通知", level: "info" });
+      log("调用 notify info");
+    }
+    function demoSuccess() {
+      webos.notify({ title: "成功", message: "操作已完成", level: "success" });
+    }
+    function demoWarning() {
+      webos.notify({ title: "警告", message: "请注意检查输入", level: "warning" });
+    }
+    function demoCritical() {
+      webos.notify({ title: "高危", message: "检测到关键事件", level: "critical" });
+    }
+    function demoAlert() {
+      webos.dialog.alert("这是从 vanilla HTML 调用的 Alert", "提示").then(function () {
+        log("alert 已关闭");
+      });
+    }
+    function demoConfirm() {
+      webos.dialog.confirm("是否继续？", "确认").then(function (r) {
+        log("confirm 结果：" + r);
+      });
+    }
+    function demoPrompt() {
+      webos.dialog.prompt("请输入：", "默认值", "请输入").then(function (r) {
+        log("prompt 结果：" + r);
+      });
+    }
+    function demoSetTitle() {
+      var title = "新标题 " + new Date().toLocaleTimeString();
+      webos.window.setTitle(title);
+      log("已设置窗口标题为：" + title);
+    }
+    function demoMinimize() {
+      webos.window.minimize();
+    }
+    var _busy = false;
+    function demoSetBusy() {
+      _busy = !_busy;
+      webos.window.setBusy(_busy);
+      log("setBusy(" + _busy + ")");
+    }
+    function demoClose() {
+      webos.window.close();
+    }
+    function demoSystemInfo() {
+      webos.system.info().then(function (info) {
+        log("system.info：" + JSON.stringify(info, null, 2));
+      });
+    }
+    function demoListApps() {
+      webos.apps.list().then(function (list) {
+        log("已注册应用：" + list.map(function (a) { return a.appId; }).join(", "));
+      });
+    }
+    function demoTheme() {
+      webos.theme.current().then(function (t) {
+        log("当前主题：" + t);
+      });
+    }
+    function demoToggleTheme() {
+      webos.theme.current().then(function (t) {
+        return webos.theme.set(t === "dark" ? "light" : "dark");
+      }).then(function () {
+        log("主题已切换");
+      });
+    }
+    function demoBroadcast() {
+      webos.events.emit("ping", { from: "vanilla-html", time: Date.now() });
+      log("已广播事件 ping");
+    }
+    function demoSendMessage() {
+      webos.message.send("sdk-demo", { hello: "from vanilla-html" }).then(function () {
+        log("已发消息给 sdk-demo");
+      });
+    }
+
+    function log(msg) {
+      var el = document.getElementById("log");
+      el.textContent = "[" + new Date().toLocaleTimeString() + "] " + msg + "\n" + el.textContent;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>扩展点插件示例</title>
+  <script src="/packages/host-sdk/dist/host-sdk.umd.js"></script>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f7fafc;
+      --panel: #ffffff;
+      --text: #1a202c;
+      --text-soft: #4a5568;
+      --border: #e2e8f0;
+      --accent: #38a169;
+      --accent-soft: #c6f6d5;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1a202c;
+        --panel: #2d3748;
+        --text: #f7fafc;
+        --text-soft: #cbd5e0;
+        --border: #4a5568;
+        --accent-soft: #22543d;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 24px;
+      font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    h1 { margin: 0 0 4px; font-size: 20px; }
+    .subtitle { margin: 0 0 16px; color: var(--text-soft); font-size: 13px; }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-radius: 4px;
+      font-family: ui-monospace, "SF Mono", Consolas, monospace;
+      font-size: 12px;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 12px;
+    }
+    .row { display: flex; align-items: center; gap: 10px; margin: 10px 0; }
+    .row label { flex: 0 0 120px; font-size: 13px; color: var(--text-soft); }
+    .row input[type="text"] {
+      flex: 1;
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 13px;
+    }
+    .row input[type="checkbox"] { transform: scale(1.2); }
+    .actions { margin-top: 16px; display: flex; gap: 8px; }
+    button {
+      padding: 6px 14px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    button.primary { background: var(--accent); color: #fff; }
+    button.secondary { background: var(--border); color: var(--text); }
+    button:hover { opacity: 0.9; }
+    pre.debug {
+      background: #1a202c;
+      color: #f7fafc;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      max-height: 140px;
+      overflow: auto;
+      margin: 12px 0 0;
+      font-family: ui-monospace, "SF Mono", Consolas, monospace;
+    }
+    .home { display: block; }
+    .settings { display: none; }
+    body[data-view="plugin-settings"] .home { display: none; }
+    body[data-view="plugin-settings"] .settings { display: block; }
+  </style>
+</head>
+<body>
+  <h1>🔌 扩展点插件示例</h1>
+  <p class="subtitle" id="subtitle">挂在 <span class="badge">example-extensible-host</span> 的 <span class="badge">settings.tabs</span> slot 上</p>
+
+  <!-- 普通启动视图 -->
+  <div class="home">
+    <div class="panel">
+      <p>这是 <strong>example-extension-plugin</strong> 的主页。</p>
+      <p>本应用通过 manifest 的 <code>contributes.extensionPoints</code> 把自己注册到了
+        <strong>扩展点宿主示例</strong> 的 <code>settings.tabs</code> slot —— 在那个应用里能看到我作为一个扩展项。</p>
+      <p>点击 <strong>扩展点宿主示例</strong> 里的本扩展卡片，会以 <code>?view=plugin-settings</code> 形式启动我，进入设置视图。</p>
+    </div>
+  </div>
+
+  <!-- 设置视图（被 host 通过 ?view=plugin-settings 唤起） -->
+  <div class="settings">
+    <div class="panel">
+      <p>当前进入的是 <strong>插件设置面板</strong> — 由 <code>example-extensible-host</code> 通过 <code>Webos.apps.open</code> 调起，启动参数是 <code>?view=plugin-settings</code>。</p>
+
+      <div class="row">
+        <label>插件名称</label>
+        <input id="cfg-name" type="text" placeholder="给插件起个名字" />
+      </div>
+      <div class="row">
+        <label>启用通知</label>
+        <input id="cfg-notify" type="checkbox" />
+      </div>
+      <div class="actions">
+        <button class="primary" id="btn-save">保存到 Webos.storage</button>
+        <button class="secondary" id="btn-load">从 storage 读取</button>
+        <button class="secondary" id="btn-test-notify">弹一条通知</button>
+      </div>
+      <pre class="debug" id="debug">[等待操作]</pre>
+    </div>
+  </div>
+
+  <script>
+    const debugEl = document.getElementById('debug')
+    function log(msg) {
+      if (!debugEl) return
+      const ts = new Date().toLocaleTimeString()
+      debugEl.textContent = `[${ts}] ${msg}\n` + debugEl.textContent
+    }
+
+    async function init() {
+      // 解析 boot info（应用启动时由 webos 提供 appId / entryId / feature / uri / params）
+      try {
+        const info = await window.Webos.app.bootInfo()
+        // 用 URL 上的 ?view= 决定视图（host 调 apps.open 时拼了这个串）
+        const view = new URL(location.href).searchParams.get('view')
+        if (view) {
+          document.body.dataset.view = view
+          log(`bootInfo: ${info.appId}/${info.entryId} · view=${view}`)
+        } else {
+          log(`bootInfo: ${info.appId}/${info.entryId} · 主页`)
+        }
+      } catch (e) {
+        log('bootInfo 出错：' + (e && e.message ? e.message : e))
+      }
+
+      // 已运行实例被 contributes/feature 重新唤起时切视图
+      window.Webos.app.onNavigate(({ uri }) => {
+        if (!uri) return
+        try {
+          const u = new URL(uri, location.href)
+          const v = u.searchParams.get('view')
+          if (v) {
+            document.body.dataset.view = v
+            log(`onNavigate -> view=${v}`)
+          }
+        } catch (_) { /* ignore */ }
+      })
+
+      const STORAGE_KEY = 'plugin-config'
+      document.getElementById('btn-save')?.addEventListener('click', async () => {
+        const cfg = {
+          name: document.getElementById('cfg-name').value,
+          notify: document.getElementById('cfg-notify').checked,
+        }
+        await window.Webos.storage.set(STORAGE_KEY, cfg)
+        log('已保存：' + JSON.stringify(cfg))
+      })
+
+      document.getElementById('btn-load')?.addEventListener('click', async () => {
+        const cfg = await window.Webos.storage.get(STORAGE_KEY)
+        if (cfg) {
+          document.getElementById('cfg-name').value = cfg.name ?? ''
+          document.getElementById('cfg-notify').checked = !!cfg.notify
+          log('已读取：' + JSON.stringify(cfg))
+        } else {
+          log('storage 里没数据')
+        }
+      })
+
+      document.getElementById('btn-test-notify')?.addEventListener('click', () => {
+        window.Webos.notify({
+          title: '来自插件的通知',
+          message: 'example-extension-plugin 作为扩展项，可以正常调用 webos 全部 SDK',
+          level: 'success',
+        })
+      })
+    }
+
+    void init()
+  </script>
+</body>
+</html>

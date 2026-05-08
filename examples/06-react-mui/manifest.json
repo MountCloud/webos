@@ -1,0 +1,50 @@
+{
+  "appId": "example-react-mui",
+  "name": "React + MUI 示例",
+  "version": "0.1.0",
+  "vendor": "MountCloud",
+  "description": "React + MUI 接入 webos 的完整示例（含 WebosThemeProvider 主题同步）",
+  "icon": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%231976d2'/><text x='32' y='44' font-size='32' text-anchor='middle' fill='%23fff' font-family='sans-serif'>🎨</text></svg>",
+  "category": "example",
+  "tags": ["example", "react", "mui", "typescript"],
+  "entries": [
+    {
+      "id": "main",
+      "name": "React + MUI 示例",
+      "icon": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%231976d2'/><text x='32' y='44' font-size='32' text-anchor='middle' fill='%23fff' font-family='sans-serif'>🎨</text></svg>",
+      "uri": "http://localhost:5504/",
+      "defaultWindow": {
+        "width": 880,
+        "height": 700,
+        "resizable": true,
+        "minWidth": 600,
+        "minHeight": 500
+      },
+      "showIn": ["desktop", "start-menu"],
+      "order": 250,
+      "features": [
+        {
+          "id": "events",
+          "name": "事件列表",
+          "uri": "?view=events",
+          "keywords": ["事件", "event", "列表"],
+          "category": "审计"
+        },
+        {
+          "id": "new-event",
+          "name": "新建事件",
+          "uri": "?view=new",
+          "keywords": ["新建", "添加", "new", "create"],
+          "category": "审计"
+        },
+        {
+          "id": "system-info",
+          "name": "系统信息",
+          "uri": "?view=info",
+          "keywords": ["系统", "info", "信息"],
+          "category": "工具"
+        }
+      ]
+    }
+  ]
+}

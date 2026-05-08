@@ -1,0 +1,126 @@
+// 顶部居中悬浮 Dock（与左右胶囊同高）
+// @author MountCloud <mountcloud@outlook.com>
+
+.webos-dock {
+  position: fixed;
+  top: var(--webos-top-bar-margin);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--webos-z-taskbar);
+  height: var(--webos-top-bar-height);
+  display: flex;
+  align-items: center;
+  background: var(--webos-color-bg-glass);
+  backdrop-filter: blur(var(--webos-blur-strong));
+  -webkit-backdrop-filter: blur(var(--webos-blur-strong));
+  border: 1px solid var(--webos-color-border);
+  border-radius: 10px;
+  box-shadow: 0 4px 14px var(--webos-color-shadow);
+  padding: 0 4px;
+  // 防止应用太多撑爆，给个最大宽度（避开左右两胶囊：~80 + ~160 + 边距）
+  max-width: calc(100vw - 320px);
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  user-select: none;
+  transition: opacity var(--webos-transition-fast);
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+
+  // 空态：完全隐藏
+  &--empty {
+    display: none;
+  }
+}
+
+.webos-dock-items {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+@keyframes webos-dock-item-in {
+  from {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.webos-dock-item {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transform-origin: center;
+  transition:
+    background var(--webos-transition-fast),
+    transform var(--webos-transition-normal);
+  animation: webos-dock-item-in var(--webos-transition-normal) cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  &:hover {
+    background: var(--webos-color-hover);
+    transform: scale(1.18);
+  }
+
+  &--active {
+    background: var(--webos-color-active);
+  }
+}
+
+.webos-dock-item-icon {
+  width: 22px;
+  height: 22px;
+  pointer-events: none;
+}
+
+.webos-dock-item-badge {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 3px;
+  background: var(--webos-color-danger);
+  color: var(--webos-color-text-inverse);
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 14px;
+  text-align: center;
+  border-radius: 7px;
+  border: 1.5px solid var(--webos-color-bg-window);
+  pointer-events: none;
+}
+
+.webos-dock-item-indicator {
+  position: absolute;
+  // 顶部 dock：活动指示点放下方
+  bottom: -3px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--webos-color-primary);
+  opacity: 0;
+  transition: opacity var(--webos-transition-fast);
+}
+
+.webos-dock-item--active .webos-dock-item-indicator {
+  opacity: 1;
+}
+
+// 拖拽窗口期间淡化 dock
+body.webos-window-interacting .webos-dock {
+  opacity: 0.6;
+}

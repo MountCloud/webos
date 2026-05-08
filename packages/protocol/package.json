@@ -1,0 +1,18 @@
+{
+  "name": "@webos/protocol",
+  "version": "0.1.0",
+  "description": "webos 通信协议与 manifest 类型",
+  "author": "MountCloud <mountcloud@outlook.com>",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs.js",
+  "module": "./dist/index.esm.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "appId": "example-jquery-legacy",
+  "name": "jQuery 示例",
+  "version": "0.1.0",
+  "vendor": "MountCloud",
+  "description": "演示 jQuery 老项目通过 UMD 接入 webos",
+  "icon": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%23d69e2e'/><text x='32' y='44' font-size='32' text-anchor='middle' fill='%23fff' font-family='sans-serif'>🦄</text></svg>",
+  "category": "example",
+  "tags": ["example", "jquery", "legacy"],
+  "entries": [
+    {
+      "id": "main",
+      "name": "jQuery 示例",
+      "icon": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%23d69e2e'/><text x='32' y='44' font-size='32' text-anchor='middle' fill='%23fff' font-family='sans-serif'>🦄</text></svg>",
+      "uri": "/examples/05-jquery-legacy/index.html",
+      "defaultWindow": {
+        "width": 720,
+        "height": 540,
+        "resizable": true
+      },
+      "showIn": ["desktop", "start-menu"],
+      "order": 140
+    }
+  ]
+}

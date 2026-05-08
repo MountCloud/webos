@@ -1,0 +1,8 @@
+* { box-sizing: border-box; }
+body { margin: 0; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: #f5f7fa; }
+main { max-width: 720px; margin: 0 auto; padding: 24px; }
+h1 { margin: 0 0 16px; font-size: 22px; }
+.actions { display: flex; gap: 8px; margin: 16px 0; flex-wrap: wrap; }
+button { padding: 8px 16px; background: #dd6b20; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; }
+button:hover { background: #c05621; }
+pre { background: #1a202c; color: #cbd5e0; padding: 12px; border-radius: 6px; font-size: 12px; max-height: 220px; overflow: auto; }

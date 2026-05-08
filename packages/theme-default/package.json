@@ -1,0 +1,19 @@
+{
+  "name": "@webos/theme-default",
+  "version": "0.1.0",
+  "description": "webos 默认主题",
+  "author": "MountCloud <mountcloud@outlook.com>",
+  "license": "MIT",
+  "main": "./dist/theme.css",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "sass src/theme.scss dist/theme.css --style=compressed",
+    "dev": "sass --watch src/theme.scss dist/theme.css",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "sass": "^1.75.0"
+  }
+}

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>__DISPLAY_NAME__</title>
+  <!-- 用 CDN UMD，零构建 -->
+  <script src="https://cdn.jsdelivr.net/npm/@webos/host-sdk/dist/host-sdk.umd.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 24px; font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: #f5f7fa; }
+    h1 { margin: 0 0 16px; font-size: 22px; }
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+    button { padding: 8px 16px; background: #2c5282; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; }
+    button:hover { background: #2a4d75; }
+    pre { background: #1a202c; color: #cbd5e0; padding: 12px; border-radius: 6px; font-size: 12px; max-height: 220px; overflow: auto; margin-top: 16px; }
+  </style>
+</head>
+<body>
+  <h1>__DISPLAY_NAME__</h1>
+  <p>这是一个由 <code>create-webos-app</code> 生成的 Vanilla HTML 应用（零构建，CDN UMD）。</p>
+  <div class="actions">
+    <button onclick="Webos.notify({ title: 'Hello', level: 'success' })">弹通知</button>
+    <button onclick="onConfirm()">Confirm</button>
+    <button onclick="Webos.window.close()">关闭窗口</button>
+  </div>
+  <pre id="log">[等待操作]</pre>
+
+  <script>
+    function log(msg) {
+      var el = document.getElementById('log')
+      el.textContent = '[' + new Date().toLocaleTimeString() + '] ' + msg + '\n' + el.textContent
+    }
+    async function onConfirm() {
+      var ok = await Webos.dialog.confirm('确认操作？')
+      log('confirm: ' + ok)
+    }
+    log('SDK 已加载')
+  </script>
+</body>
+</html>

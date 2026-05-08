@@ -1,0 +1,43 @@
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  padding: 24px;
+  font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+  background: #f5f7fa;
+  color: #1a202c;
+  line-height: 1.6;
+}
+h1 { margin: 0 0 8px; font-size: 22px; }
+.subtitle { color: #718096; font-size: 13px; margin-bottom: 20px; }
+.card {
+  background: #fff;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+.card h2 { margin: 0 0 12px; font-size: 14px; color: #2c5282; }
+button {
+  padding: 8px 14px;
+  margin: 4px 6px 4px 0;
+  background: #2c5282;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+button:hover { background: #2a4d75; }
+button.danger { background: #c53030; }
+button.danger:hover { background: #9b2c2c; }
+pre {
+  background: #1a202c;
+  color: #cbd5e0;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  max-height: 220px;
+  overflow: auto;
+  margin: 0;
+  font-family: "Consolas", "Monaco", monospace;
+}

@@ -1,0 +1,153 @@
+// 基础重置
+// @author MountCloud <mountcloud@outlook.com>
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--webos-font-family);
+  font-size: var(--webos-font-size-base);
+  line-height: var(--webos-line-height);
+  color: var(--webos-color-text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#webos-root {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: inherit;
+  padding: 0;
+}
+
+input, textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+img {
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+// 全局滚动条（覆盖浏览器默认）
+// 用 * 选择器是为了让 webos shell 内任何嵌套 div / pre / textarea 的滚动条都跟随主题
+// 跨域 iframe 应用的滚动条由 host-sdk 在 iframe 自己的 document 里注入同款样式
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--webos-scrollbar-thumb) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: var(--webos-scrollbar-size);
+  height: var(--webos-scrollbar-size);
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--webos-scrollbar-thumb);
+  border-radius: calc(var(--webos-scrollbar-size) / 2);
+  // 内 padding 营造"thumb 比轨道窄"的视觉，更接近 macOS 风格
+  background-clip: padding-box;
+  border: 2px solid transparent;
+  transition: background var(--webos-transition-fast);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--webos-scrollbar-thumb-hover);
+}
+
+*::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+// 基础按钮
+.webos-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 32px;
+  padding: 0 16px;
+  border-radius: var(--webos-radius-md);
+  font-size: var(--webos-font-size-base);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--webos-transition-fast);
+  border: 1px solid transparent;
+
+  &:focus-visible {
+    outline: 2px solid var(--webos-color-primary);
+    outline-offset: 2px;
+  }
+
+  &--primary {
+    background: var(--webos-color-primary);
+    color: var(--webos-color-text-inverse);
+    &:hover { background: var(--webos-color-primary-hover); }
+  }
+
+  &--secondary {
+    background: transparent;
+    color: var(--webos-color-text);
+    border-color: var(--webos-color-border-strong);
+    &:hover { background: var(--webos-color-hover); }
+  }
+
+  &--danger {
+    background: var(--webos-color-danger);
+    color: var(--webos-color-text-inverse);
+    &:hover { filter: brightness(0.92); }
+  }
+
+  &--text {
+    background: transparent;
+    color: var(--webos-color-accent);
+    padding: 0 8px;
+    height: 28px;
+    &:hover {
+      background: var(--webos-color-hover);
+      color: var(--webos-color-accent-hover);
+    }
+  }
+}
+
+// 基础输入框
+.webos-input {
+  width: 100%;
+  height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--webos-color-border-strong);
+  border-radius: var(--webos-radius-md);
+  background: var(--webos-color-bg-window);
+  color: var(--webos-color-text);
+  outline: none;
+  transition: border-color var(--webos-transition-fast);
+
+  &:focus {
+    border-color: var(--webos-color-primary);
+    box-shadow: 0 0 0 3px var(--webos-color-focus-ring);
+  }
+}

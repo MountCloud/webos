@@ -1,0 +1,141 @@
+// 设计 Token
+// webos 默认主题（亮色 + 暗色）
+// @author MountCloud <mountcloud@outlook.com>
+
+:root {
+  // 颜色
+  --webos-color-primary: #2c5282;
+  --webos-color-primary-hover: #2a4d75;
+  // 强调色：用作前景文字 / 链接 / 文字按钮（写在玻璃面板上）
+  // 与 primary 区分：primary 当填充色用（白字配深底），accent 当前景文字用
+  --webos-color-accent: #2c5282;
+  --webos-color-accent-hover: #2a4d75;
+  // focus 高亮（输入框 box-shadow / outline 用）
+  --webos-color-focus-ring: rgba(44, 82, 130, 0.25);
+  --webos-color-bg-base: #f5f7fa;
+  --webos-color-bg-window: #ffffff;
+  --webos-color-bg-glass: rgba(255, 255, 255, 0.85);
+  --webos-color-bg-glass-strong: rgba(255, 255, 255, 0.95);
+  --webos-color-bg-overlay: rgba(0, 0, 0, 0.4);
+  --webos-color-text: #1a202c;
+  --webos-color-text-muted: #718096;
+  --webos-color-text-inverse: #ffffff;
+  --webos-color-border: rgba(0, 0, 0, 0.08);
+  --webos-color-border-strong: rgba(0, 0, 0, 0.16);
+  --webos-color-shadow: rgba(0, 0, 0, 0.12);
+  --webos-color-danger: #c53030;
+  --webos-color-warning: #d97706;
+  --webos-color-success: #2f855a;
+  --webos-color-info: #3182ce;
+  --webos-color-hover: rgba(0, 0, 0, 0.05);
+  --webos-color-active: rgba(0, 0, 0, 0.10);
+
+  // 滚动条
+  --webos-scrollbar-size: 10px;
+  --webos-scrollbar-thumb: rgba(0, 0, 0, 0.20);
+  --webos-scrollbar-thumb-hover: rgba(0, 0, 0, 0.35);
+
+  // 字体
+  --webos-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+  --webos-font-mono: "SF Mono", Menlo, Consolas, "Courier New", monospace;
+  --webos-font-size-xs: 11px;
+  --webos-font-size-sm: 12px;
+  --webos-font-size-base: 13px;
+  --webos-font-size-md: 14px;
+  --webos-font-size-lg: 16px;
+  --webos-font-size-xl: 20px;
+  --webos-line-height: 1.5;
+
+  // 间距
+  --webos-spacing-xs: 4px;
+  --webos-spacing-sm: 8px;
+  --webos-spacing-md: 12px;
+  --webos-spacing-lg: 16px;
+  --webos-spacing-xl: 24px;
+  --webos-spacing-2xl: 32px;
+
+  // 圆角
+  --webos-radius-sm: 4px;
+  --webos-radius-md: 6px;
+  --webos-radius-lg: 8px;
+  --webos-radius-xl: 12px;
+
+  // 玻璃质感
+  --webos-blur: 12px;
+  --webos-blur-strong: 24px;
+  --webos-shadow-window: 0 10px 40px rgba(0, 0, 0, 0.15);
+  --webos-shadow-popover: 0 4px 16px rgba(0, 0, 0, 0.12);
+  --webos-shadow-notification: 0 6px 20px rgba(0, 0, 0, 0.18);
+
+  // 动效
+  --webos-transition-fast: 150ms ease;
+  --webos-transition-normal: 250ms ease;
+  --webos-transition-slow: 400ms ease;
+
+  // 桌面
+  // 默认背景：风景照片 + 顶层暗色叠加（保证图标文字在亮色区域仍可读）
+  // 加载失败时 fallback 到渐变
+  --webos-desktop-bg:
+    linear-gradient(rgba(0, 0, 0, 0.25), rgba(0, 0, 0, 0.35)),
+    url("/wallpaper-default.jpg"),
+    linear-gradient(135deg, #1e3a5f 0%, #2c5282 50%, #1a4480 100%);
+
+  // 桌面图标大小（小 72 / 中 96 / 大 120；运行时由 SettingsPanel 写回 :root）
+  --webos-icon-size: 96px;
+  --webos-icon-image-size: calc(var(--webos-icon-size) * 0.58);
+
+  // 顶栏（左/右上角胶囊）
+  --webos-top-bar-height: 40px;
+  --webos-top-bar-margin: 12px;
+
+  // 底部 Dock
+  --webos-dock-height: 56px;
+  --webos-dock-margin: 12px;
+
+  // 兼容别名（外部主题包可能用过老变量）
+  --webos-taskbar-height: var(--webos-dock-height);
+  --webos-taskbar-bg: var(--webos-color-bg-glass);
+  --webos-topbar-height: var(--webos-top-bar-height);
+
+  // 窗口
+  --webos-window-radius: var(--webos-radius-lg);
+  --webos-window-shadow: var(--webos-shadow-window);
+  --webos-window-head-height: 36px;
+  --webos-window-head-bg: var(--webos-color-bg-glass-strong);
+
+  // z-index 层级
+  --webos-z-desktop: 1;
+  --webos-z-icons: 10;
+  --webos-z-windows: 100;
+  --webos-z-taskbar: 1000;
+  --webos-z-popover: 10000;
+  --webos-z-notification: 100000;
+  --webos-z-modal: 1000000;
+}
+
+// 暗色主题
+[data-webos-theme="dark"] {
+  --webos-color-bg-base: #1a202c;
+  --webos-color-bg-window: #2d3748;
+  --webos-color-bg-glass: rgba(45, 55, 72, 0.85);
+  --webos-color-bg-glass-strong: rgba(45, 55, 72, 0.95);
+  --webos-color-bg-overlay: rgba(0, 0, 0, 0.6);
+  --webos-color-text: #f7fafc;
+  --webos-color-text-muted: #a0aec0;
+  --webos-color-border: rgba(255, 255, 255, 0.1);
+  --webos-color-border-strong: rgba(255, 255, 255, 0.2);
+  --webos-color-shadow: rgba(0, 0, 0, 0.4);
+  --webos-color-hover: rgba(255, 255, 255, 0.08);
+  --webos-color-active: rgba(255, 255, 255, 0.16);
+  --webos-scrollbar-thumb: rgba(255, 255, 255, 0.20);
+  --webos-scrollbar-thumb-hover: rgba(255, 255, 255, 0.35);
+  // primary 提亮：原 #2c5282 配白字在深色玻璃上几乎看不出按钮形状；
+  // 改成 #3182ce（同色相但 L 更高），白字对比度 ~4.7:1 通过 AA
+  --webos-color-primary: #3182ce;
+  --webos-color-primary-hover: #2c5282;
+  // accent 是前景文字，要在深色玻璃上可读：#63b3ed 在 #2d3748 上 ~5.3:1
+  --webos-color-accent: #63b3ed;
+  --webos-color-accent-hover: #4299e1;
+  --webos-color-focus-ring: rgba(99, 179, 237, 0.35);
+}

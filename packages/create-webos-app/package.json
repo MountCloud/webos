@@ -1,0 +1,34 @@
+{
+  "name": "create-webos-app",
+  "version": "0.1.0",
+  "description": "脚手架 CLI：创建 webos 应用（支持 React+MUI / Vue / Vanilla / jQuery 等多种模板）",
+  "author": "MountCloud <mountcloud@outlook.com>",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "create-webos-app": "./bin/cli.mjs"
+  },
+  "files": [
+    "bin",
+    "src",
+    "templates",
+    "README.md"
+  ],
+  "scripts": {
+    "test:dev": "node bin/cli.mjs"
+  },
+  "dependencies": {
+    "kolorist": "^1.8.0",
+    "prompts": "^2.4.2"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "webos",
+    "scaffold",
+    "create",
+    "cli",
+    "template"
+  ]
+}

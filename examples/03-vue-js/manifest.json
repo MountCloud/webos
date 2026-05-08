@@ -1,0 +1,25 @@
+{
+  "appId": "example-vue-js",
+  "name": "Vue 3 示例",
+  "version": "0.1.0",
+  "vendor": "MountCloud",
+  "description": "Vue 3 Composition API 接入 webos 的示例（纯 JS）",
+  "icon": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%2342b883'/><text x='32' y='44' font-size='32' text-anchor='middle' fill='%23fff' font-family='sans-serif'>🟢</text></svg>",
+  "category": "example",
+  "tags": ["example", "vue"],
+  "entries": [
+    {
+      "id": "main",
+      "name": "Vue 3 示例",
+      "icon": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%2342b883'/><text x='32' y='44' font-size='32' text-anchor='middle' fill='%23fff' font-family='sans-serif'>🟢</text></svg>",
+      "uri": "http://localhost:5502/",
+      "defaultWindow": {
+        "width": 760,
+        "height": 580,
+        "resizable": true
+      },
+      "showIn": ["desktop", "start-menu"],
+      "order": 120
+    }
+  ]
+}
