@@ -263,20 +263,20 @@ Each entry can specify `launchMode` (under `entries[i]`) in the manifest:
 
 ### Homepage
 
-![Welcome](readme/欢迎.jpg)
+![Welcome](readmeimg/欢迎.jpg)
 
 ### Multi-window & SDK
 
-![Welcome](readme/多窗口.jpg)
+![Welcome](readmeimg/多窗口.jpg)
 
 ### System Settings
 
-![Welcome](readme/系统设置.jpg)
+![Welcome](readmeimg/系统设置.jpg)
 
 ### Search
 
-![Welcome](readme/搜索.jpg)
+![Welcome](readmeimg/搜索.jpg)
 
 ### Main Menu
 
-![Welcome](readme/主菜单.jpg)
+![Welcome](readmeimg/主菜单.jpg)

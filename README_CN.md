@@ -260,20 +260,20 @@ manifest 在 `entries[i].features` 下声明，让全局搜索直接跳到应用
 
 ### 主页
 
-![欢迎](readme/欢迎.jpg)
+![欢迎](readmeimg/欢迎.jpg)
 
 ### 多窗口&SDK
 
-![欢迎](readme/多窗口.jpg)
+![欢迎](readmeimg/多窗口.jpg)
 
 ### 系统设置
 
-![欢迎](readme/系统设置.jpg)
+![欢迎](readmeimg/系统设置.jpg)
 
 ### 搜索
 
-![欢迎](readme/搜索.jpg)
+![欢迎](readmeimg/搜索.jpg)
 
 ### 主菜单
 
-![欢迎](readme/主菜单.jpg)
+![欢迎](readmeimg/主菜单.jpg)
