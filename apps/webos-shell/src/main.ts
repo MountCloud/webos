@@ -30,6 +30,8 @@ import {
 } from './shell'
 import { SettingsPanel, loadAndApplyIconSize } from './shell/SettingsPanel'
 import { UserMenu } from './shell/UserMenu'
+import { LoginDialog } from './shell/LoginDialog'
+import { UserSession } from './user'
 import { ThemeRegistry } from './theme'
 import { i18n, t } from './i18n'
 
@@ -113,6 +115,17 @@ async function bootstrap(): Promise<void> {
   registerBuiltinApps()
   AppRegistry.instance.addSource(new StaticAppSource(getDemoApps()))
   AppRegistry.instance.addSource(new StaticAppSource(getExampleApps()))
+
+  // 仅开发期：注册"测试程序"本地数据源 + 右上角 + 按钮
+  // import.meta.env.DEV 编译时被 Vite 替换成字面量 true/false，prod build 自动 tree-shake
+  if (import.meta.env.DEV) {
+    const { testAppSource } = await import('./apps/TestAppSource')
+    AppRegistry.instance.addSource(testAppSource)
+    const { TestAppDialog } = await import('./shell/TestAppDialog')
+    topRight.enableTestAppButton()
+    topRight.on('plusClick', () => TestAppDialog.instance.open())
+  }
+
   await AppRegistry.instance.refresh()
 
   // ===== 桌面图标（按 entry 渲染：一个应用 N 个 entry → N 个桌面图标） =====
@@ -200,22 +213,46 @@ async function bootstrap(): Promise<void> {
   const settingsPanel = SettingsPanel.instance
   topRight.on('settingsClick', (anchor) => settingsPanel.toggle({ x: anchor.x, y: anchor.y }))
   const userMenu = UserMenu.instance
-  // 配置登录 / 退出登录的具体行为；使用方按需改成自家 SSO 跳转
+  // UserMenu 现在只处理"已登录态下的用户菜单"——登录流程由 LoginDialog 负责。
   userMenu.configure({
-    onLogin: () => {
-      // 默认：跳到同 origin 的 /login.html；登录页写 localStorage 再跳回 /
-      location.href = '/login.html'
-    },
     onLogout: () => {
-      // UserSession.clear() 已在 UserMenu 内调过；这里只决定登出后去哪
-      // 默认留在桌面（user.changed 已广播，应用自己处理"被登出"）
-      // 想直接跳登录页：location.href = '/login.html'
+      // UserSession.clear() 已在 UserMenu 内调过；下面的 user.change 监听会自动重弹登录框。
     },
     onAccountSettings: () => {
       notifyAndRecord({ title: '账户设置', message: '应用方可接入', level: 'info' })
     },
   })
   topRight.on('userClick', (anchor) => userMenu.toggle({ x: anchor.x, y: anchor.y }))
+
+  // ===== 登录 / 锁屏流程 =====
+  // 苹果风：未登录时整个桌面外壳（图标 / 顶栏 / dock）由 body.webos-locked 类隐藏，
+  // 只露出壁纸 + 居中登录卡。登录成功才解锁；登出会再次锁屏并弹回登录框。
+  function lockUI(): void {
+    document.body.classList.add('webos-locked')
+  }
+  function unlockUI(): void {
+    document.body.classList.remove('webos-locked')
+  }
+
+  async function ensureSignedIn(): Promise<void> {
+    if (UserSession.instance.authenticated) return
+    lockUI()
+    try {
+      await LoginDialog.instance.show()
+    } finally {
+      unlockUI()
+    }
+  }
+
+  // 启动时检查会话；没登录就阻塞在登录框
+  await ensureSignedIn()
+
+  // 登出（或 token 过期、外部强制清 session）→ 再次弹登录框
+  UserSession.instance.on('change', ({ user }) => {
+    if (!user) {
+      void ensureSignedIn()
+    }
+  })
 
   // ===== Dock 行为 =====
   const lastFocusAt = new Map<string, number>()

@@ -1,0 +1,293 @@
+// 锁屏 + 登录对话框样式
+// 苹果风：未登录时只露壁纸 + 居中登录卡，桌面外壳全隐藏
+// @author MountCloud <mountcloud@outlook.com>
+
+// ============================================================
+// 锁屏：body.webos-locked 时隐藏桌面外壳，只留壁纸
+// ============================================================
+body.webos-locked {
+  // 桌面图标 / 顶栏 / dock 全部隐藏，让壁纸 + 登录卡占主视觉
+  .webos-desktop-icons,
+  .webos-top-left,
+  .webos-top-right,
+  .webos-dock {
+    display: none !important;
+  }
+
+  // 已经打开的窗口锁屏期间也不可见（避免登出后还能操作之前打开的应用）
+  .webos-desktop-windows {
+    display: none !important;
+  }
+}
+
+// ============================================================
+// 登录遮罩 + 卡片
+// ============================================================
+.webos-login-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: var(--webos-z-modal, 1000000);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  // 比 dialog 的遮罩深一点，强调"必须登录"
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  opacity: 0;
+  transition: opacity 240ms ease;
+
+  &--shown {
+    opacity: 1;
+  }
+}
+
+.webos-login-card {
+  width: 340px;
+  padding: 32px 28px 24px;
+  background: rgba(28, 32, 44, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: 18px;
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  // 静态终态：可见。入场用显式 from/to keyframe 实现 0→1 进入。
+  // 不能让静态 opacity=0 靠 animation-fill-mode: forwards 撑着——
+  // 一旦后续加 --shake 替换 animation property，forwards 失效，
+  // 静态 opacity:0 立刻回归，整个卡片就消失了（之前的 bug）。
+  opacity: 1;
+  transform: scale(1);
+  animation: webos-login-card-in 280ms cubic-bezier(0.2, 0.9, 0.2, 1);
+
+  &--shake {
+    animation: webos-login-shake 360ms cubic-bezier(0.36, 0.07, 0.19, 0.97);
+  }
+
+  &--success {
+    animation: webos-login-success 200ms ease forwards;
+  }
+}
+
+@keyframes webos-login-card-in {
+  from {
+    transform: scale(0.96);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes webos-login-shake {
+  10%, 90%  { transform: translateX(-2px); }
+  20%, 80%  { transform: translateX(4px); }
+  30%, 50%, 70% { transform: translateX(-8px); }
+  40%, 60% { transform: translateX(8px); }
+}
+
+@keyframes webos-login-success {
+  to {
+    transform: scale(0.94);
+    opacity: 0;
+  }
+}
+
+// 头像
+.webos-login-avatar {
+  width: 76px;
+  height: 76px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.06);
+
+  svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+}
+
+// 标题
+.webos-login-title {
+  font-size: 16px;
+  font-weight: 600;
+  text-align: center;
+  letter-spacing: 0.2px;
+}
+
+.webos-login-subtitle {
+  margin-top: 4px;
+  margin-bottom: 22px;
+  font-size: 12px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+// 错误提示
+.webos-login-error {
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(255, 69, 58, 0.12);
+  border: 1px solid rgba(255, 69, 58, 0.3);
+  color: #ff9a92;
+  font-size: 12.5px;
+  line-height: 1.4;
+  text-align: center;
+  display: none;
+
+  &--shown {
+    display: block;
+  }
+}
+
+// 输入字段（pill 样式）
+.webos-login-field {
+  margin-bottom: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  transition: border-color 150ms ease, background 150ms ease;
+
+  &:focus-within {
+    border-color: rgba(99, 179, 237, 0.6);
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  &--in-row {
+    flex: 1;
+    margin-bottom: 0;
+    margin-right: 8px;
+  }
+}
+
+.webos-login-input {
+  width: 100%;
+  height: 38px;
+  padding: 0 16px;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #fff;
+  font: inherit;
+  font-size: 13.5px;
+
+  &::placeholder {
+    color: rgba(255, 255, 255, 0.45);
+  }
+
+  &:-webkit-autofill,
+  &:-webkit-autofill:hover,
+  &:-webkit-autofill:focus {
+    -webkit-text-fill-color: #fff;
+    -webkit-box-shadow: 0 0 0 30px rgba(28, 32, 44, 0.95) inset;
+    transition: background-color 5000s ease-in-out 0s;
+  }
+}
+
+// 密码行：输入框 + 右侧圆形提交按钮
+.webos-login-pwd-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.webos-login-submit {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  background: linear-gradient(135deg, #4fa3ff 0%, #3672e0 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: filter 150ms ease, transform 80ms ease;
+  box-shadow: 0 4px 12px rgba(54, 114, 224, 0.4);
+  position: relative;
+
+  &:hover:not(:disabled) {
+    filter: brightness(1.08);
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.94);
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  &-arrow {
+    width: 18px;
+    height: 18px;
+    transition: opacity 120ms ease;
+  }
+
+  &-spinner {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: webos-login-spin 0.7s linear infinite;
+    opacity: 0;
+    transition: opacity 120ms ease;
+  }
+
+  &--loading {
+    .webos-login-submit-arrow { opacity: 0; }
+    .webos-login-submit-spinner { opacity: 1; }
+  }
+}
+
+@keyframes webos-login-spin {
+  to { transform: rotate(360deg); }
+}
+
+// 记住我
+.webos-login-remember {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: rgba(255, 255, 255, 0.68);
+  cursor: pointer;
+  user-select: none;
+
+  input[type='checkbox'] {
+    width: 13px;
+    height: 13px;
+    accent-color: #4fa3ff;
+    cursor: pointer;
+  }
+}
+
+// 减弱动画偏好
+@media (prefers-reduced-motion: reduce) {
+  .webos-login-overlay,
+  .webos-login-card,
+  .webos-login-submit-spinner {
+    animation: none !important;
+    transition: none !important;
+  }
+  .webos-login-card {
+    opacity: 1;
+    transform: none;
+  }
+}

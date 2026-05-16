@@ -10,11 +10,11 @@ import { createEl, removeEl } from '../helpers/dom'
 import { UserSession, type UserInfo } from '../user'
 
 export interface UserMenuOptions {
-  // 没登录时点 "登录" 按钮的回调（一般是跳转到登录页）
-  onLogin?: () => void
-  // 退出确认后调（可改成跳转到登录页 / 调 SSO logout 接口）
+  // 退出登录后的回调。UserSession.clear() 已经在内部调过，这里只是给业务方"事后钩子"
+  // （比如清自家的业务缓存）。回到登录态由 main.ts 的 LoginDialog 流程自动处理，
+  // 不需要在这里写跳转。
   onLogout?: () => void
-  // 点 "账户设置" 时
+  // 点 "账户设置" 时（业务方按需打开自家账户管理应用）
   onAccountSettings?: () => void
 }
 
@@ -61,72 +61,58 @@ export class UserMenu extends UIElement {
   private _renderInto(el: HTMLElement): void {
     const head = createEl('div', { className: 'webos-user-menu-head' })
 
-    if (this._user) {
-      const avatar = createEl('div', {
-        className: 'webos-user-menu-avatar',
-        text: this._user.name[0]?.toUpperCase() ?? '?',
-      })
-      if (this._user.avatar) {
-        avatar.innerHTML = ''
-        avatar.appendChild(
-          createEl('img', { attrs: { src: this._user.avatar, alt: this._user.name } }),
-        )
-      }
-      head.appendChild(avatar)
-      const info = createEl('div', { className: 'webos-user-menu-info' })
-      info.appendChild(createEl('div', { className: 'webos-user-menu-name', text: this._user.name }))
-      if (this._user.email) {
-        info.appendChild(
-          createEl('div', { className: 'webos-user-menu-email', text: this._user.email }),
-        )
-      }
-      head.appendChild(info)
-    } else {
-      const avatar = createEl('div', {
-        className: 'webos-user-menu-avatar webos-user-menu-avatar--empty',
-        text: '?',
-      })
-      head.appendChild(avatar)
-      const info = createEl('div', { className: 'webos-user-menu-info' })
-      info.appendChild(createEl('div', { className: 'webos-user-menu-name', text: '未登录' }))
-      info.appendChild(
-        createEl('div', {
-          className: 'webos-user-menu-email',
-          text: '点击下方"登录"接入 SSO',
-        }),
-      )
-      head.appendChild(info)
+    // 注意：UserMenu 只在登录态打开（未登录态整个顶栏由 main.ts 的 webos-locked 类隐藏掉），
+    // 所以这里假设 _user 永远非空。理论上不会进 else 分支，
+    // 留个降级显示防止万一（比如登出瞬间 popover 还在）。
+    if (!this._user) {
+      head.appendChild(createEl('div', {
+        className: 'webos-user-menu-name',
+        text: '未登录',
+      }))
+      el.appendChild(head)
+      return
     }
+
+    const avatar = createEl('div', {
+      className: 'webos-user-menu-avatar',
+      text: this._user.name[0]?.toUpperCase() ?? '?',
+    })
+    if (this._user.avatar) {
+      avatar.innerHTML = ''
+      avatar.appendChild(
+        createEl('img', { attrs: { src: this._user.avatar, alt: this._user.name } }),
+      )
+    }
+    head.appendChild(avatar)
+    const info = createEl('div', { className: 'webos-user-menu-info' })
+    info.appendChild(createEl('div', { className: 'webos-user-menu-name', text: this._user.name }))
+    if (this._user.email) {
+      info.appendChild(
+        createEl('div', { className: 'webos-user-menu-email', text: this._user.email }),
+      )
+    }
+    head.appendChild(info)
     el.appendChild(head)
 
     const list = createEl('div', { className: 'webos-user-menu-list' })
-    if (this._user) {
-      list.appendChild(
-        this._item('账户设置', () => {
-          this._options.onAccountSettings?.()
+    list.appendChild(
+      this._item('账户设置', () => {
+        this._options.onAccountSettings?.()
+        this.close()
+      }),
+    )
+    list.appendChild(
+      this._item(
+        '退出登录',
+        () => {
+          // UserSession.clear() 触发 user.change(null) → main.ts 的监听器自动重弹登录框
+          UserSession.instance.clear()
+          this._options.onLogout?.()
           this.close()
-        }),
-      )
-      list.appendChild(
-        this._item(
-          '退出登录',
-          () => {
-            // 主程序内同进程调用：直接清 session（自动 broadcast user.changed）
-            UserSession.instance.clear()
-            this._options.onLogout?.()
-            this.close()
-          },
-          true,
-        ),
-      )
-    } else {
-      list.appendChild(
-        this._item('登录', () => {
-          this._options.onLogin?.()
-          this.close()
-        }),
-      )
-    }
+        },
+        true,
+      ),
+    )
     el.appendChild(list)
   }
 

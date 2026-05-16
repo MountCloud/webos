@@ -223,21 +223,42 @@ export async function run() {
 
   // ===== 完成 =====
   const pm = detectPackageManager()
+  const isCDN = templateId === 'vanilla-html' || templateId === 'jquery'
+  const usesHostSdk = templateId !== 'vanilla-html'  // 全部都用 host-sdk；vanilla-html / jquery 走 UMD
+  const usesMuiTheme = templateId === 'react-mui-js' || templateId === 'react-mui-ts'
+
   console.log()
   console.log(bold(green('✓ 完成！')) + ` 接下来：`)
   console.log()
   if (basename(targetDir) !== process.cwd()) {
     console.log(`  ${cyan(`cd ${projectName}`)}`)
   }
-  console.log(`  ${cyan(`${pm} install`)}`)
-  if (templateId === 'vanilla-html' || templateId === 'jquery') {
+
+  if (isCDN) {
+    // jquery / vanilla-html 走 UMD CDN：@webos/host-sdk 不在 npm，jsdelivr 也拿不到
+    // 用户需要从 webos 拷 dist/host-sdk.umd.js 到本地
+    console.log(yellow('  ⚠ 本模板用 UMD 引用 @webos/host-sdk，由于团队不发 npm，'))
+    console.log(yellow('    CDN 路径 (https://cdn.jsdelivr.net/npm/@webos/host-sdk/...) 会 404！'))
+    console.log(yellow('    解决方法：从 webos/packages/host-sdk/dist/ 拷 host-sdk.umd.js'))
+    console.log(yellow('    到本项目，再把 index.html 里的 <script src="..."> 改成相对路径。'))
+    console.log()
     console.log(`  ${cyan(`${pm === 'npm' ? 'npx' : pm} serve`)} ${dim('# 或任意静态服务器')}`)
-  } else {
+  } else if (usesHostSdk) {
+    // 有 package.json 的模板：必须先 npm link 再 npm install
+    console.log(dim('  ⚠ 第一次启动前必读 PREREQUISITES.md：'))
+    console.log(dim('    @webos/host-sdk 不在 npm registry 上，要先 npm link 接本地 webos。'))
+    console.log()
+    const linkArgs = usesMuiTheme
+      ? '@webos/host-sdk @webos/mui-theme'
+      : '@webos/host-sdk'
+    console.log(`  ${cyan(`${pm} link ${linkArgs}`)}   ${dim('# 一次性，前提是已在 webos 那边做过 npm link')}`)
+    console.log(`  ${cyan(`${pm} install`)}`)
     console.log(`  ${cyan(`${pm} run dev`)}`)
   }
+
   console.log()
   console.log(dim('  把 manifest.json 注册到 webos shell 才能在桌面看到 ↑'))
-  console.log(dim('  详见生成项目里的 README.md'))
+  console.log(dim('  详见生成项目里的 README.md / PREREQUISITES.md'))
   console.log()
 }
 

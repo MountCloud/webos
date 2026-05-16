@@ -10,6 +10,14 @@ import { AppLoader } from './AppLoader'
 import { AppRegistry } from './AppRegistry'
 import { resolveEntryUri } from './AppManifest'
 import {
+  AppWindow,
+  DialogWindow,
+  WindowManager,
+  type DialogButtonDef,
+  type DialogModal,
+  type DialogResult,
+} from '../core/window'
+import {
   alert,
   confirm,
   prompt,
@@ -68,6 +76,50 @@ export function registerBuiltinHandlers(): void {
   // 完整 prompt：返回 { button, value }
   bus.registerHandler('dialog', 'promptEx', async (req) => {
     return await openPrompt(req.args as PromptOptions)
+  })
+
+  // ===== 自定义弹窗（嵌入页面 / appId+entryId） =====
+  // 见 DialogWindow.ts 完整说明
+  bus.registerHandler('dialog', 'openPage', async (req, source) => {
+    return await openPageDialog(req.args as OpenPageArgs, source)
+  })
+
+  // 内嵌页主动 close()
+  bus.registerHandler('dialog', 'closeFromInside', async (req) => {
+    const args = req.args as { dialogId: string; buttonId: string | null; data?: unknown }
+    const dialog = findDialogById(args.dialogId)
+    if (dialog) dialog.closeFromInside(args.buttonId, args.data)
+    return null
+  })
+
+  // 内嵌页 onAction 回报结果
+  bus.registerHandler('dialog', 'actionResult', async (req) => {
+    const args = req.args as {
+      dialogId: string
+      actionId: string
+      close: boolean
+      data?: unknown
+      error?: string
+    }
+    const dialog = findDialogById(args.dialogId)
+    if (dialog) {
+      dialog.completeAction(args.actionId, {
+        close: args.close,
+        data: args.data,
+        error: args.error,
+      })
+    }
+    return null
+  })
+
+  // 内嵌页查询自己的 dialog 上下文
+  bus.registerHandler('dialog', 'context', async (req) => {
+    const args = req.args as { dialogId: string }
+    const dialog = findDialogById(args.dialogId)
+    if (!dialog) {
+      return { inDialog: false, dialogId: null, buttons: [], modal: 'none' }
+    }
+    return dialog.context
   })
 
   // ===== Webos.window =====
@@ -376,4 +428,120 @@ export function notifyAndRecord(opts: Parameters<typeof notify>[0]): ReturnType<
     level: opts.level ?? 'info',
   })
   return notify(opts)
+}
+
+// ============================================================
+// dialog.openPage 实现
+// ============================================================
+
+interface OpenPageArgs {
+  url?: string
+  app?: { appId: string; entryId: string; params?: Record<string, unknown> }
+  title?: string
+  icon?: string
+  width?: number
+  height?: number
+  buttons?: DialogButtonDef[]
+  modal?: DialogModal
+}
+
+let _nextDialogIdCounter = 0
+function generateDialogId(): string {
+  return `dlg-${++_nextDialogIdCounter}-${Date.now().toString(36)}`
+}
+
+function findDialogById(dialogId: string): DialogWindow | null {
+  for (const w of WindowManager.instance.getAll()) {
+    if (w instanceof DialogWindow && w.dialogId === dialogId) return w
+  }
+  return null
+}
+
+async function openPageDialog(args: OpenPageArgs, source: AppWindow): Promise<DialogResult> {
+  // 解析 URL：优先 args.url；否则用 appId+entryId 解析 manifest 拿 uri
+  let url: string
+  if (args.url) {
+    // 相对路径以调用方 app 的 URL 为 base 解析（不是 shell 的 URL）
+    try {
+      url = new URL(args.url, source.appUrl).toString()
+    } catch {
+      url = args.url
+    }
+  } else if (args.app) {
+    const entries = AppRegistry.instance.listEntries()
+    const entry = entries.find(
+      (e) => e.appId === args.app!.appId && e.id === args.app!.entryId,
+    )
+    if (!entry) {
+      throw Object.assign(new Error(`app ${args.app.appId}/${args.app.entryId} 不存在`), {
+        code: 'APP_NOT_FOUND',
+      })
+    }
+    url = resolveEntryUri(entry, '')
+    // params 拼成查询串
+    if (args.app.params) {
+      const u = new URL(url, window.location.href)
+      for (const [k, v] of Object.entries(args.app.params)) {
+        u.searchParams.set(k, String(v))
+      }
+      url = u.toString()
+    }
+  } else {
+    throw new Error('dialog.openPage: 必须传 url 或 app')
+  }
+
+  const dialogId = generateDialogId()
+  const modal: DialogModal = args.modal ?? 'parent'
+  const buttons: DialogButtonDef[] = args.buttons ?? []
+
+  // 创建 DialogWindow
+  const dialog = new DialogWindow({
+    dialogId,
+    appId: source.appId,           // 复用调用方 appId 标识，便于内嵌页 RPC 上报
+    entryId: source.entryId,
+    url,
+    title: args.title ?? '对话框',
+    icon: args.icon,
+    width: args.width ?? 720,
+    height: args.height ?? 480,
+    buttons,
+    modal,
+    resizable: false,
+    maximizable: false,
+    minimizable: false,
+    showInTaskbar: false,
+    alwaysOnTop: modal !== 'none',
+    pushEvent: (event, payload) => {
+      AppMessageBus.instance.pushEvent(dialog, event, payload)
+    },
+  })
+
+  WindowManager.instance.register(dialog)
+  // DialogWindow 自己就是个 AppWindow，要注册到 MessageBus 才能收 / 发 iframe RPC
+  AppMessageBus.instance.registerWindow(dialog)
+
+  // 应用模态
+  if (modal === 'parent') {
+    WindowManager.instance.enterParentModal(source)
+    dialog.on('close', () => WindowManager.instance.exitParentModal(source))
+  } else if (modal === 'global') {
+    WindowManager.instance.enterGlobalModal(dialog)
+    dialog.on('close', () => WindowManager.instance.exitGlobalModal(dialog))
+  }
+
+  // 等待结果
+  return new Promise<DialogResult>((resolve) => {
+    let settled = false
+    dialog.setResultResolver((r) => {
+      if (settled) return
+      settled = true
+      resolve(r)
+    })
+    // 窗口被强关（点 ×）但没人调 _settle 时兜底
+    dialog.on('close', () => {
+      if (settled) return
+      settled = true
+      resolve({ buttonId: null })
+    })
+  })
 }

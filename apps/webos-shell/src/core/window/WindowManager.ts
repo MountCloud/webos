@@ -34,6 +34,10 @@ export class WindowManager extends EventEmitter<WindowManagerEvents> {
   private stack: string[] = []
   private _container: HTMLElement | null = null
 
+  // global 模态栈 + 全屏遮罩（多个 global modal 时栈 push/pop）
+  private _globalModalStack: string[] = []
+  private _globalMask: HTMLElement | null = null
+
   // 桌面容器（窗口挂载到这里）
   setContainer(container: HTMLElement): void {
     this._container = container
@@ -165,5 +169,68 @@ export class WindowManager extends EventEmitter<WindowManagerEvents> {
     for (const w of [...this.windows.values()]) {
       await w.close()
     }
+  }
+
+  // ============================================================
+  // 模态控制（被 DialogWindow 在 open / close 时调）
+  // ============================================================
+
+  /**
+   * 进入 'parent' 模态：让指定父窗口不可点击。
+   * 用引用计数支持嵌套（dialog A 弹 dialog B 弹 dialog C，都 modal=parent 时 A 一直被锁）。
+   */
+  enterParentModal(parent: Window): void {
+    parent.setDisabled('modal', true)
+  }
+
+  exitParentModal(parent: Window): void {
+    parent.setDisabled('modal', false)
+  }
+
+  /**
+   * 进入 'global' 模态：除 modal window 自己外整个桌面不可点。
+   * 多个 global modal 时按栈管理，最后一个出栈才落 mask。
+   */
+  enterGlobalModal(modalWin: Window): void {
+    this._globalModalStack.push(modalWin.id)
+    this._ensureGlobalMask()
+    if (this._globalMask) {
+      // mask 的 z-index 紧贴在 modal 窗口下方
+      this._globalMask.style.display = 'block'
+      this._globalMask.style.zIndex = String((modalWin.zIndex || 0) - 1)
+    }
+  }
+
+  exitGlobalModal(modalWin: Window): void {
+    this._globalModalStack = this._globalModalStack.filter((id) => id !== modalWin.id)
+    if (this._globalModalStack.length === 0) {
+      if (this._globalMask) this._globalMask.style.display = 'none'
+    } else {
+      // 还有别的 global modal 在，把 mask 紧贴到剩下的栈顶下方
+      const topId = this._globalModalStack[this._globalModalStack.length - 1]!
+      const top = this.windows.get(topId)
+      if (top && this._globalMask) {
+        this._globalMask.style.zIndex = String((top.zIndex || 0) - 1)
+      }
+    }
+  }
+
+  private _ensureGlobalMask(): void {
+    if (this._globalMask) return
+    const mask = document.createElement('div')
+    mask.className = 'webos-global-modal-mask'
+    mask.style.cssText =
+      'position: fixed; inset: 0; background: rgba(0, 0, 0, 0.32); display: none;'
+    // 拦截所有指针事件
+    mask.addEventListener('mousedown', (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+    })
+    mask.addEventListener('contextmenu', (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+    })
+    document.body.appendChild(mask)
+    this._globalMask = mask
   }
 }

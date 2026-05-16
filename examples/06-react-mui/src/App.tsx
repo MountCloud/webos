@@ -122,6 +122,32 @@ export function App(): JSX.Element {
     }
   }
 
+  // openPage 演示：嵌入本应用的 "?view=edit&id=xxx" 表单页作为弹窗
+  const [openPageResult, setOpenPageResult] = useState<string | null>(null)
+  const handleOpenEditDialog = async (id: number) => {
+    const r = await Webos.dialog.openPage<{ name: string; level: string }>({
+      url: `./?view=edit&id=${id}`,
+      title: `编辑工单 #${id}`,
+      width: 520,
+      height: 360,
+      modal: 'parent',                                   // 阻塞本应用窗口
+      buttons: [
+        { id: 'save', label: '保存', type: 'primary', autoFocus: true },
+        { id: 'cancel', label: '取消', cancel: true },
+      ],
+    })
+    if (r.buttonId === 'save' && r.data) {
+      setRows((prev) =>
+        prev.map((row) =>
+          row.id === id ? { ...row, name: r.data!.name, level: r.data!.level as Row['level'] } : row,
+        ),
+      )
+      setOpenPageResult(`#${id} 已保存：${r.data.name} (${r.data.level})`)
+    } else {
+      setOpenPageResult(`#${id} 取消了编辑`)
+    }
+  }
+
   const handleCustomDialog = async () => {
     const action = await Webos.dialog.show<'save' | 'discard' | 'cancel'>({
       title: '保存修改？',
@@ -155,6 +181,12 @@ export function App(): JSX.Element {
   const handleBroadcast = () => {
     void Webos.events.emit('demo.ping', { from: 'react-mui', t: Date.now() })
     setSnack('已广播 demo.ping')
+  }
+
+  // view=edit 是被 openPage 嵌入加载的"编辑表单页"
+  // 整页就是一个表单，不画 AppBar / 主界面那一套
+  if (view === 'edit') {
+    return <EditDialogPage rows={initialRows} />
   }
 
   return (
@@ -342,12 +374,13 @@ export function App(): JSX.Element {
                       <TableCell>事件</TableCell>
                       <TableCell>级别</TableCell>
                       <TableCell align="right">时间</TableCell>
+                      <TableCell align="right">操作</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {rows.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={4} align="center" sx={{ py: 3, opacity: 0.6 }}>
+                        <TableCell colSpan={5} align="center" sx={{ py: 3, opacity: 0.6 }}>
                           暂无数据
                         </TableCell>
                       </TableRow>
@@ -371,12 +404,29 @@ export function App(): JSX.Element {
                             />
                           </TableCell>
                           <TableCell align="right">{r.time}</TableCell>
+                          <TableCell align="right">
+                            <Button
+                              size="small"
+                              variant="text"
+                              onClick={() => handleOpenEditDialog(r.id)}
+                            >
+                              编辑
+                            </Button>
+                          </TableCell>
                         </TableRow>
                       ))
                     )}
                   </TableBody>
                 </Table>
               </TableContainer>
+              {openPageResult && (
+                <Typography
+                  variant="caption"
+                  sx={{ mt: 1, display: 'block', color: 'text.secondary' }}
+                >
+                  ↳ {openPageResult}
+                </Typography>
+              )}
             </CardContent>
           </Card>
         </Stack>
@@ -389,6 +439,100 @@ export function App(): JSX.Element {
         message={snack ?? ''}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       />
+    </Box>
+  )
+}
+
+// ============================================================
+// EditDialogPage —— openPage 嵌入加载的"编辑工单"表单页
+// 路径：./?view=edit&id=N （由 handleOpenEditDialog 触发）
+//
+// 关键点：
+// 1. 不画 AppBar / 主界面，纯表单 —— 它整页就是 dialog 的 body
+// 2. Webos.dialog.onAction() 接 "save" / "cancel" 按钮事件（footer 由宿主渲染）
+// 3. 校验失败时返回 { close: false, error: '...' } 阻止关闭，宿主显示红字
+// 4. 校验通过时返回 { close: true, data: {...} }，宿主 close dialog +
+//    解决调用方 openPage 的 Promise
+// ============================================================
+function EditDialogPage({ rows }: { rows: Row[] }): JSX.Element {
+  const idStr = new URL(window.location.href).searchParams.get('id') ?? ''
+  const id = Number(idStr)
+  const initial = rows.find((r) => r.id === id) ?? { id: 0, name: '', level: 'info' as const, time: '' }
+
+  const [name, setName] = useState(initial.name)
+  const [level, setLevel] = useState<Row['level']>(initial.level)
+
+  useEffect(() => {
+    // 注册按钮事件 —— host 端点 footer 上的 "保存" / "取消" 时回调
+    const off = Webos.dialog.onAction(async (buttonId) => {
+      if (buttonId === 'cancel') {
+        // cancel 类按钮宿主已经在点的时候直接 settle，这里其实不会被触发；
+        // 留作防御
+        return { close: true }
+      }
+      if (buttonId === 'save') {
+        const trimmed = name.trim()
+        if (!trimmed) {
+          return { close: false, error: '名称不能为空' }
+        }
+        if (trimmed.length > 32) {
+          return { close: false, error: '名称不能超过 32 字符' }
+        }
+        // 模拟一个异步保存
+        await new Promise((r) => setTimeout(r, 300))
+        return { close: true, data: { name: trimmed, level } }
+      }
+      return undefined
+    })
+    return off
+  }, [name, level])
+
+  return (
+    <Box sx={{ p: 3, height: '100vh', display: 'flex', flexDirection: 'column', bgcolor: 'background.default' }}>
+      <Typography variant="subtitle1" gutterBottom>
+        正在编辑工单 #{id}
+      </Typography>
+      <Typography variant="caption" color="text.secondary" sx={{ mb: 2 }}>
+        修改名称或级别后点 footer 的"保存"。空名称会被拦截不让关闭。
+      </Typography>
+      <Stack spacing={2} sx={{ flex: 1 }}>
+        <TextField
+          label="事件名称"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          fullWidth
+          autoFocus
+          size="small"
+          helperText="不能为空，不能超过 32 字符（输错点保存会被宿主拦截）"
+        />
+        <Box>
+          <Typography variant="body2" gutterBottom>
+            级别
+          </Typography>
+          <ButtonGroup size="small" variant="outlined">
+            <Button
+              variant={level === 'info' ? 'contained' : 'outlined'}
+              onClick={() => setLevel('info')}
+            >
+              info
+            </Button>
+            <Button
+              variant={level === 'warning' ? 'contained' : 'outlined'}
+              color="warning"
+              onClick={() => setLevel('warning')}
+            >
+              warning
+            </Button>
+            <Button
+              variant={level === 'critical' ? 'contained' : 'outlined'}
+              color="error"
+              onClick={() => setLevel('critical')}
+            >
+              critical
+            </Button>
+          </ButtonGroup>
+        </Box>
+      </Stack>
     </Box>
   )
 }

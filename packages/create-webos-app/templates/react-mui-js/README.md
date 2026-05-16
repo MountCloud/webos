@@ -2,11 +2,16 @@
 
 由 [`create-webos-app`](https://www.npmjs.com/package/create-webos-app) 生成的 webos 应用 · **React + MUI · JavaScript**
 
+> ⚠ **第一次启动前必读** [`PREREQUISITES.md`](PREREQUISITES.md)：
+> `@webos/host-sdk` 和 `@webos/mui-theme` 不在 npm registry 上，要先用 `npm link` 接本地 webos。
+
 ## 启动
 
 ```bash
-pnpm install   # 或 npm install / yarn
-pnpm dev       # http://localhost:5173
+# 按 PREREQUISITES 配好全局 link 后：
+npm link @webos/host-sdk @webos/mui-theme   # 一次性
+npm install
+npm run dev                                  # http://localhost:5173
 ```
 
 ## 注册到 webos

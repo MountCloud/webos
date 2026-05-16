@@ -12,6 +12,8 @@ export interface TopRightBarEvents {
   userClick: { x: number; y: number }
   settingsClick: { x: number; y: number }
   searchClick: void
+  /** 开发期"测试程序"按钮点击；仅在 main.ts 调用 enableTestAppButton() 后触发 */
+  plusClick: void
   [key: string]: unknown
 }
 
@@ -102,4 +104,27 @@ export class TopRightBar extends UIElement<TopRightBarEvents> {
       this._notifyBadgeEl.style.display = ''
     }
   }
+
+  /**
+   * 启用右侧 "+" 按钮（仅开发期）。
+   * 默认不渲染——main.ts 用 import.meta.env.DEV 守门后调用一次即可。
+   * 重复调用安全（只挂一次）。
+   */
+  enableTestAppButton(title = '添加测试程序（仅开发期）'): void {
+    if (this._plusBtnEl) return
+    const btn = createEl('button', {
+      className: 'webos-top-right-btn webos-top-right-add',
+      attrs: { type: 'button', title, 'aria-label': title },
+    })
+    // SVG 风格跟其他按钮对齐：24×24 viewBox、stroke="currentColor" 1.6、linecap round
+    btn.innerHTML =
+      '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">' +
+      '<path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" fill="none"/>' +
+      '</svg>'
+    this.addDomListener(btn, 'click', () => this.emit('plusClick', undefined))
+    this.el.appendChild(btn)
+    this._plusBtnEl = btn
+  }
+
+  private _plusBtnEl: HTMLElement | null = null
 }

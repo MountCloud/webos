@@ -351,10 +351,35 @@ export class Window extends UIElement<WindowEvents> implements WindowHandle {
   }
 
   setBusy(busy: boolean): void {
-    if (this._disableMask) {
-      this._disableMask.style.display = busy ? 'block' : 'none'
+    this._setDisabledReason('busy', busy)
+  }
+
+  /**
+   * 模态阻塞：被打开的 modal=parent 类型 dialog 调，让父窗口不可点。
+   * 多个 modal 嵌套时按引用计数累加；setDisabled('modal', false) 减一，归零时才真正落下 mask。
+   */
+  setDisabled(reason: 'modal' | 'busy', on: boolean): void {
+    this._setDisabledReason(reason, on)
+  }
+
+  private _disableReasons = new Set<string>()
+  private _modalRefCount = 0
+  private _setDisabledReason(reason: 'modal' | 'busy', on: boolean): void {
+    if (reason === 'modal') {
+      this._modalRefCount += on ? 1 : -1
+      if (this._modalRefCount < 0) this._modalRefCount = 0
+      if (this._modalRefCount > 0) this._disableReasons.add('modal')
+      else this._disableReasons.delete('modal')
+    } else {
+      if (on) this._disableReasons.add(reason)
+      else this._disableReasons.delete(reason)
     }
-    this.el.classList.toggle('webos-window--busy', busy)
+    const disabled = this._disableReasons.size > 0
+    if (this._disableMask) {
+      this._disableMask.style.display = disabled ? 'block' : 'none'
+    }
+    this.el.classList.toggle('webos-window--busy', this._disableReasons.has('busy'))
+    this.el.classList.toggle('webos-window--modal-blocked', this._disableReasons.has('modal'))
   }
 
   setBody(content: HTMLElement | string): void {

@@ -251,3 +251,127 @@
   // 鼠标移过缝隙不会瞬间收起
   margin-left: 0;
 }
+
+// ============================================================
+// DialogWindow（嵌入 iframe + 自定义按钮 + 模态）
+// ============================================================
+.webos-dialog-window {
+  // body 区域留给 iframe，footer 单独一行
+  .webos-window-body {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  &.webos-window--modal-blocked {
+    // 父窗口被本 dialog 模态阻塞时，加视觉提示
+    filter: brightness(0.92);
+  }
+}
+
+.webos-dialog-window-footer {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--webos-spacing-md);
+  padding: var(--webos-spacing-md) var(--webos-spacing-lg);
+  border-top: 1px solid var(--webos-color-border);
+  background: var(--webos-color-bg-window);
+}
+
+.webos-dialog-window-error {
+  flex: 1;
+  font-size: var(--webos-font-size-sm);
+  color: var(--webos-color-danger);
+  opacity: 0;
+  transition: opacity var(--webos-transition-fast);
+
+  &--shown {
+    opacity: 1;
+  }
+}
+
+.webos-dialog-window-buttons {
+  display: flex;
+  gap: var(--webos-spacing-sm);
+}
+
+// 当 dialog 内的 body 直接装 iframe（appWindow 行为），footer 在 iframe 下方
+.webos-dialog-window > .webos-dialog-window-footer {
+  order: 99;
+}
+
+// ============================================================
+// DialogWindow iframe 加载遮罩
+// iframe URL 加载完成前盖一层 spinner，避免空白
+// ============================================================
+.webos-dialog-window-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--webos-spacing-md);
+  background: var(--webos-color-bg-window);
+  z-index: 2;
+  opacity: 1;
+  transition: opacity 220ms ease;
+  pointer-events: auto;
+
+  &--hide {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  &--error {
+    .webos-dialog-window-loading-spinner {
+      animation: none;
+    }
+    .webos-dialog-window-loading-arc {
+      stroke: var(--webos-color-danger);
+      stroke-dasharray: 90 100;
+    }
+    .webos-dialog-window-loading-text {
+      color: var(--webos-color-danger);
+    }
+  }
+}
+
+.webos-dialog-window-loading-spinner {
+  width: 36px;
+  height: 36px;
+  animation: webos-dialog-loading-spin 1.2s linear infinite;
+}
+
+.webos-dialog-window-loading-track {
+  stroke: var(--webos-color-border);
+}
+
+.webos-dialog-window-loading-arc {
+  stroke: var(--webos-color-primary);
+  // 弧形：约 1/4 圆周
+  stroke-dasharray: 35 100;
+  stroke-dashoffset: 0;
+}
+
+.webos-dialog-window-loading-text {
+  font-size: var(--webos-font-size-sm);
+  color: var(--webos-color-text-muted);
+}
+
+@keyframes webos-dialog-loading-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .webos-dialog-window-loading-spinner {
+    animation: none;
+  }
+  .webos-dialog-window-loading {
+    transition: none;
+  }
+}
