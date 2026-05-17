@@ -303,10 +303,11 @@
 }
 
 // ============================================================
-// DialogWindow iframe 加载遮罩
+// iframe 加载遮罩 —— AppWindow / DialogWindow 共用
+// （类名通用化后留在 dialog.scss 是历史遗留，搬到独立 scss 也行）
 // iframe URL 加载完成前盖一层 spinner，避免空白
 // ============================================================
-.webos-dialog-window-loading {
+.webos-iframe-loading {
   position: absolute;
   inset: 0;
   display: flex;
@@ -326,52 +327,65 @@
   }
 
   &--error {
-    .webos-dialog-window-loading-spinner {
+    .webos-iframe-loading-spinner {
       animation: none;
     }
-    .webos-dialog-window-loading-arc {
+    .webos-iframe-loading-arc {
       stroke: var(--webos-color-danger);
       stroke-dasharray: 90 100;
     }
-    .webos-dialog-window-loading-text {
+    .webos-iframe-loading-text {
       color: var(--webos-color-danger);
     }
   }
 }
 
-.webos-dialog-window-loading-spinner {
+// 纯 CSS border 转圈——丢弃了原本的 SVG（track + arc 两个 circle 的方案），
+// 改用一个 div + border 实现：4 条边里 3 条灰、顶边亮色，旋转就是一段移动的弧。
+// 优点：
+//   - 元素是普通 block div，浏览器能稳定地把它放到 compositor 层
+//   - 不涉及 SVG 重栅格化，每帧 GPU 直接合成一个旋转后的位图
+//   - 没有 dasharray / stroke 这些可能触发主线程重绘的属性
+.webos-iframe-loading-spinner {
+  display: block;
   width: 36px;
   height: 36px;
-  animation: webos-dialog-loading-spin 1.2s linear infinite;
+  box-sizing: border-box;
+  border-radius: 50%;
+  // 灰圈底色（轨道）—— 颜色透明度跟原 SVG track 一致
+  border: 3px solid var(--webos-color-border);
+  // 顶边亮色 —— 旋转时这一段就是"游动的弧"
+  border-top-color: var(--webos-color-primary);
+  // 转的就是元素整体，绕几何中心
+  transform-origin: 50% 50%;
+  // 提示浏览器 transform 会变 → 独立合成层 → 主线程卡顿不影响动画
+  will-change: transform;
+  // 兜底：老浏览器不理 will-change 时，translateZ 同样能开 layer
+  transform: translateZ(0);
+  animation: webos-iframe-loading-spin 1.2s linear infinite;
 }
 
-.webos-dialog-window-loading-track {
-  stroke: var(--webos-color-border);
-}
-
-.webos-dialog-window-loading-arc {
-  stroke: var(--webos-color-primary);
-  // 弧形：约 1/4 圆周
-  stroke-dasharray: 35 100;
-  stroke-dashoffset: 0;
-}
-
-.webos-dialog-window-loading-text {
+.webos-iframe-loading-text {
   font-size: var(--webos-font-size-sm);
   color: var(--webos-color-text-muted);
 }
 
-@keyframes webos-dialog-loading-spin {
-  to {
-    transform: rotate(360deg);
-  }
+@keyframes webos-iframe-loading-spin {
+  // translateZ(0) 是为了开独立合成层（见 .spinner 规则注释），所以 keyframe
+  // 里也带上——只在 rotate 之外保留它，浏览器才会持续把元素当独立 layer 跑
+  from { transform: translateZ(0) rotate(0deg); }
+  to   { transform: translateZ(0) rotate(360deg); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .webos-dialog-window-loading-spinner {
-    animation: none;
+  // loading 是关键 UI 状态指示，不算"装饰动画"——用户即使关了动画偏好，
+  // 也得让他知道"正在加载"。这里把 1.2s 拉到 4.8s（4 倍慢），降低视觉骚扰但保持转动；
+  // 不直接 animation: none 把圆圈钉死。
+  .webos-iframe-loading-spinner {
+    animation-duration: 1s;
   }
-  .webos-dialog-window-loading {
+  // 淡出过渡纯装饰，可以禁
+  .webos-iframe-loading {
     transition: none;
   }
 }

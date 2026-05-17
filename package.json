@@ -7,12 +7,12 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "dev": "pnpm --filter @webos/shell dev",
+    "dev": "pnpm build:packages && pnpm --filter @webos/shell dev",
     "dev:examples": "pnpm --parallel --filter=example-vanilla-js-vite --filter=example-vue-js --filter=example-react-ts --filter=example-react-mui dev",
-    "dev:all": "pnpm --parallel --filter=@webos/shell --filter=example-vanilla-js-vite --filter=example-vue-js --filter=example-react-ts --filter=example-react-mui dev",
+    "dev:all": "pnpm build:packages && pnpm --parallel --filter=@webos/shell --filter=example-vanilla-js-vite --filter=example-vue-js --filter=example-react-ts --filter=example-react-mui dev",
     "build": "pnpm -r build",
     "build:shell": "pnpm --filter @webos/shell build",
-    "build:packages": "pnpm --filter './packages/*' build",
+    "build:packages": "pnpm --filter \"@webos/*\" build",
     "lint": "pnpm -r lint",
     "test": "pnpm -r test",
     "clean": "pnpm -r clean && rm -rf node_modules"

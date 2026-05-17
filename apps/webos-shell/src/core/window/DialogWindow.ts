@@ -94,48 +94,8 @@ export class DialogWindow extends AppWindow {
       this._renderFooter()
     }
 
-    // 加载遮罩：iframe 内容没出来之前盖一层 spinner，避免空白难受
-    this._renderLoadingMask()
-  }
-
-  private _renderLoadingMask(): void {
-    const mask = createEl('div', { className: 'webos-dialog-window-loading' })
-    // 转圈 svg + 文案
-    mask.innerHTML =
-      '<svg class="webos-dialog-window-loading-spinner" viewBox="0 0 50 50" aria-hidden="true">' +
-      '<circle class="webos-dialog-window-loading-track" cx="25" cy="25" r="20" fill="none" stroke-width="4"/>' +
-      '<circle class="webos-dialog-window-loading-arc" cx="25" cy="25" r="20" fill="none" stroke-width="4" stroke-linecap="round"/>' +
-      '</svg>' +
-      '<div class="webos-dialog-window-loading-text">加载中…</div>'
-    // 挂到 body 上，绝对定位覆盖 iframe（CSS 处理）
-    this.body.appendChild(mask)
-
-    const iframe = this.iframe
-    if (!iframe) {
-      // 没 iframe 直接收掉遮罩
-      mask.remove()
-      return
-    }
-
-    // iframe load / error 都把遮罩淡出
-    const hide = (): void => {
-      mask.classList.add('webos-dialog-window-loading--hide')
-      setTimeout(() => mask.remove(), 220)
-    }
-    const showError = (): void => {
-      const text = mask.querySelector('.webos-dialog-window-loading-text')
-      if (text) text.textContent = '页面加载失败'
-      mask.classList.add('webos-dialog-window-loading--error')
-      // 失败时不再自动淡出，留着提示用户
-    }
-    iframe.addEventListener('load', hide, { once: true })
-    iframe.addEventListener('error', showError, { once: true })
-    // 兜底：8s 还没 load 也淡出（iframe 跨源时 'load' 可能不可靠）
-    setTimeout(() => {
-      if (mask.isConnected && !mask.classList.contains('webos-dialog-window-loading--hide')) {
-        hide()
-      }
-    }, 8000)
+    // 加载遮罩由父类 AppWindow 在构造期已经挂上了（_renderLoadingMask），
+    // 用同一份 .webos-iframe-loading-* CSS，dialog 不再重复挂
   }
 
   private _renderFooter(): void {

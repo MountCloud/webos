@@ -1,0 +1,5 @@
+// 占位 —— webos-shell 当前不引用 @webos/theme-default，主题样式在
+// apps/webos-shell/src/styles/ 下自给自足。保留这个空 scss 让
+// `sass src/theme.scss dist/theme.css` 这条 build 命令不会因为缺源文件挂掉。
+//
+// 想把通用 token / 默认主题搬到这里供其他应用复用时再往下面写规则。
