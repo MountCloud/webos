@@ -297,6 +297,53 @@ dock.on('itemClick', ({ item }) => {
 })
 ```
 
+### #20 iframe 加载 spinner 不转 / 卡顿掉帧
+
+**症状（按演化顺序）**：
+
+1. 最初用内嵌 SVG + `<animateTransform>` 做旋转：**完全不转**——某些浏览器对 SVG SMIL 动画在隐藏 / 重新 attach 时停止驱动
+2. 换成 `<div>` + `border-top-color` 实色 + `@keyframes rotate(360deg)`：**能转但每 1/4 圈卡一下、丢帧**，肉眼可见
+3. 加了 `will-change: transform`：**仍卡**——浏览器没把元素提到独立合成层
+
+**根因**：纯 2D `transform: rotate()` 默认走 **paint + composite**，每帧重算 layer。spinner 又小又"不重要"，合成器优先级低 → 在主线程繁忙时（应用首屏 JS 解析、布局）就丢帧。`will-change` 是**提示**不是强制，浏览器有自己启发式判断要不要真开合成层。
+
+**修法（最终方案，在 `dialog.scss .webos-iframe-loading-spinner`）**：
+
+```scss
+.webos-iframe-loading-spinner {
+  width: 36px; height: 36px;
+  border: 3px solid var(--webos-color-border);
+  border-top-color: var(--webos-color-primary);
+  border-radius: 50%;
+  will-change: transform;        // 提示
+  transform: translateZ(0);      // 强制开独立合成层（兜底，老浏览器不理 will-change）
+  animation: webos-iframe-loading-spin 1.2s linear infinite;
+}
+
+@keyframes webos-iframe-loading-spin {
+  // ⚠ keyframe 里 translateZ(0) 必须保留，否则合成层在动画期间被 fold 掉，卡顿复发
+  from { transform: translateZ(0) rotate(0deg);   }
+  to   { transform: translateZ(0) rotate(360deg); }
+}
+```
+
+**关键 3 点**：
+- `will-change: transform` + `transform: translateZ(0)` **双管齐下**：前者新浏览器认，后者老浏览器和 fallback 都认
+- **keyframe 的 `from` / `to` 里必须也带 `translateZ(0)`**——否则浏览器看到动画值 transform 不含 3D，合成层在动画运行时被优化掉，卡顿原样复发
+- **不要用 SVG SMIL 动画**做这种小动画，CSS keyframe + 强制合成层最稳
+
+**`prefers-reduced-motion: reduce` 处理**：
+
+```scss
+@media (prefers-reduced-motion: reduce) {
+  // 不要用 animation: none —— 那样 spinner 完全静止，用户以为应用卡死了。
+  // 减速到 4.8s/圈（原 1.2s 的 4 倍），既尊重用户偏好又保留"还在加载"的功能性反馈。
+  .webos-iframe-loading-spinner { animation-duration: 4.8s; }
+}
+```
+
+**通用启发**：旋转 / scale 类小元素动画感觉卡，第一反应是开独立合成层（`will-change` + `translateZ(0)` 双管 + keyframe 全程带 translateZ），不是去调动画曲线或帧率。
+
 ---
 
 ## 🟢 通用经验

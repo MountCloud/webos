@@ -123,7 +123,6 @@ interface WindowOptions {
  * 浮动窗口
  * 单个窗口实例，由 WindowManager 创建和管理
  *
- * @author MountCloud <mountcloud@outlook.com>
  */
 export class Window extends EventEmitter<WindowEvents> {
   readonly id: string
@@ -179,8 +178,6 @@ interface WindowEvents {
 /**
  * 窗口管理器
  * 维护窗口栈、z-index、聚焦逻辑
- *
- * @author MountCloud <mountcloud@outlook.com>
  */
 export class WindowManager extends EventEmitter<WindowManagerEvents> {
   private windows = new Map<string, Window>()

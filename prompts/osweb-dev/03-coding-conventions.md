@@ -130,12 +130,8 @@ if (req.appId !== trustedAppId) {
 /**
  * 应用加载器
  * 启动应用：根据 manifest 创建 AppWindow，注册到 MessageBus
- *
- * @author MountCloud <mountcloud@outlook.com>
  */
 ```
-
-**作者** 一律 `MountCloud <mountcloud@outlook.com>`，**MIT 协议**。
 
 ### 中文 OK，混着英文 OK
 

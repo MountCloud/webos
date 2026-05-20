@@ -35,4 +35,3 @@ webos 的 host-sdk 改了：重跑 build 然后**手动重拷** UMD 文件到本
 
 如果嫌烦，建议切到 `vanilla-js` 或 `react-*` 模板用 npm link，自动跟随源码。
 
-@author MountCloud &lt;mountcloud@outlook.com&gt;

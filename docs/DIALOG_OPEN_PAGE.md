@@ -146,4 +146,3 @@ const ctx = await Webos.dialog.context()
 | 相对 URL 解析错位置 | DialogWindow 用 `source.appUrl` 作 base 解析，应该指向调用方 app 不是 shell |
 | 关闭按钮 × 卡住 | footer 没有标 `cancel: true` 的按钮；加一个 cancel 按钮或省略 buttons |
 
-@author MountCloud &lt;mountcloud@outlook.com&gt;

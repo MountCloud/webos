@@ -20,7 +20,6 @@
 - [ ] 没引入新的 `node_modules` / `dist` / `.env` 进 git（看 `.gitignore`）
 - [ ] 没在生产代码里留 `console.log` / `debugger`（debug 日志可以 `Webos.configure({ debug: true })` 开关）
 - [ ] 注释是中文 + 解释 WHY，没有 AI 风格赘述（"任务 5.3 我们..." 之类）
-- [ ] 文件头有 `@author MountCloud <mountcloud@outlook.com>`（如果是新文件）
 - [ ] 触发的 prompts 文件有更新（如果发现新坑或新模式）
 
 ---

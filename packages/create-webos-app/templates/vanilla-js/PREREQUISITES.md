@@ -60,4 +60,3 @@ A: 行，package.json 把 `^0.1.0` 改成 `file:` 路径即可：
    ```
    但每次 webos 包改了需要 `npm install` 才生效；link 方式自动跟随。
 
-@author MountCloud &lt;mountcloud@outlook.com&gt;

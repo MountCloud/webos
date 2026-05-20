@@ -70,6 +70,10 @@ export default defineConfig({
     },
   },
   server: {
+    // 显式绑全 IPv4 接口——避免 Windows 默认 IPv6 优先时只绑 ::1，
+    // 导致 127.0.0.1 / 内网 IP 都连不上，只有 localhost 能通的诡异现象。
+    // 不想暴露到 LAN 时改成 '127.0.0.1'（仅 IPv4 loopback）。
+    host: '0.0.0.0',
     port: 5173,
     open: true,
     fs: {
