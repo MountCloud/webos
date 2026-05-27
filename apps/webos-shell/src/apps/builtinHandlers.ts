@@ -246,10 +246,10 @@ export function registerBuiltinHandlers(): void {
       appId: string
       appName: string
       entryId: string
-      label: string
-      icon?: string
-      description?: string
-      uri: string
+      host: string
+      slot: string
+      uri?: string
+      [key: string]: unknown
     }> = []
     for (const m of AppRegistry.instance.list()) {
       const eps = m.contributes?.extensionPoints ?? []
@@ -258,19 +258,11 @@ export function registerBuiltinHandlers(): void {
         if (slot && ep.slot !== slot) continue
         const entry = m.entries.find((e) => e.id === ep.entryId)
         if (!entry) continue
-        // resolve full URI: entry.uri + (ep.uri 子路径)
-        const fullUri = ep.uri
-          ? resolveEntryUri(entry, ep.uri)
-          : entry.uri
-        out.push({
-          appId: m.appId,
-          appName: m.name,
-          entryId: ep.entryId,
-          label: ep.label,
-          icon: ep.icon,
-          description: ep.description,
-          uri: fullUri,
-        })
+        // uri 声明了才解析成完整 URL（entry.uri + ep.uri 子路径）；没声明 / 非字符串则不带
+        const uri =
+          typeof ep.uri === 'string' && ep.uri ? resolveEntryUri(entry, ep.uri) : undefined
+        // 透传 ep 全部属性（含业务自定义），再用框架字段覆盖保留名
+        out.push({ ...ep, appId: m.appId, appName: m.name, uri })
       }
     }
     return out

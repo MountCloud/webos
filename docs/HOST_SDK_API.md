@@ -684,13 +684,16 @@ Webos.app.onNavigate(({ feature, uri }) => {
 contributes.list(filter: { host: string; slot?: string }): Promise<ContributedExtension[]>
 
 interface ContributedExtension {
-  appId: string                  // 提供方 appId
+  appId: string                  // 提供方 appId（框架注入）
   appName: string
   entryId: string                // 提供方对应的 entry
-  label: string                  // host UI 上显示的文字
+  host: string                   // 与查询条件一致，原样带回
+  slot: string
+  uri?: string                   // 扩展点声明了 uri 才有：host 已解析的完整 URL
+  label?: string                 // host UI 上显示的文字（业务字段，可选）
   icon?: string
   description?: string
-  uri: string                    // 完整可加载的 URL（host 已解析 entry.uri + ep.uri）
+  [key: string]: unknown         // 扩展点里的其余任意业务属性，原样带回
 }
 ```
 
@@ -709,6 +712,7 @@ for (const ext of exts) {
 
 - `host` / `slot` 是宿主和扩展之间的字符串协议（host 文档应公开自己支持哪些 slot）
 - 提供方的 manifest 需要声明 `contributes.extensionPoints[*]`，详见 [APP_MANIFEST_SPEC.md](./APP_MANIFEST_SPEC.md) §4.3
+- 扩展点除 `host` / `slot` / `entryId` 外可带任意业务属性（`label` / `icon` / 自定义字段），`list()` 原样带回；`uri` 给了才解析、不给则不带
 
 ---
 

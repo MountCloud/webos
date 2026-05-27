@@ -607,6 +607,7 @@ function getExampleApps(): AppManifest[] {
         },
       ],
       contributes: {
+        // 固定字段只有 host / slot / entryId，其余（order / badge 等）随便放，host 端 contributes.list 原样拿到
         extensionPoints: [
           {
             host: 'example-extensible-host',
@@ -614,8 +615,22 @@ function getExampleApps(): AppManifest[] {
             entryId: 'main',
             label: '插件设置面板',
             icon: makeSvgIcon('🔌'),
-            description: '由 example-extension-plugin 提供的设置项；点击会打开本插件并跳到设置视图',
+            description: '声明了 uri，点开以 ?view=plugin-settings 启动，进设置视图',
             uri: '?view=plugin-settings',
+            // 业务自定义属性，原样透传
+            order: 10,
+            badge: 'beta',
+          },
+          {
+            host: 'example-extensible-host',
+            slot: 'settings.tabs',
+            entryId: 'main',
+            label: '插件主页（无 uri）',
+            icon: makeSvgIcon('🔌'),
+            description: '没声明 uri，点开直接启动插件默认页',
+            // 业务自定义属性，原样透传
+            order: 20,
+            badge: 'new',
           },
         ],
       },

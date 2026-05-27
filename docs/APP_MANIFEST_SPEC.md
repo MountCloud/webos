@@ -118,19 +118,17 @@ interface AppContributes {
 }
 
 interface ExtensionPoint {
-  // 被扩展的应用 appId
-  host: string
-  // 槽位名（host / extension 之间约定）
-  slot: string
-  // 触发时打开本应用哪个 entry（必填，必须存在于 entries[]）
-  entryId: string
-  // 在 host UI 上显示的文字
-  label: string
+  // ===== 固定字段（框架必填）=====
+  host: string             // 被扩展的应用 appId
+  slot: string             // 槽位名（host / extension 之间约定）
+  entryId: string          // 触发时打开本应用哪个 entry（必须存在于 entries[]）
+  // ===== 业务字段（框架不强制，list() 原样带回）=====
+  uri?: string             // 给了才解析成完整 URL；不给则 list() 不带 uri
+  label?: string           // host UI 上显示的文字
   icon?: string
   description?: string
-  // 相对所选 entry.uri 的子路径
-  uri?: string
   permissions?: string[]
+  [key: string]: unknown   // 任意业务自定义属性，原样透传给 host
 }
 ```
 
@@ -302,18 +300,43 @@ if (info.feature === 'customers') router.push('/customers')
 }
 ```
 
+**字段规则**：
+
+- `host` / `slot` / `entryId` 是**固定字段**（框架必填）：host 用来过滤、entryId 用来启动，`entryId` 必须存在于本应用 `entries[]`。
+- **其余属性随便放**——`label` / `icon` / `description` 以及任何业务自定义字段（如 `order` / `badge` / `meta`），`Webos.contributes.list()` 会**原样带回**。`label` 不再必填。
+- `uri` 给了才解析：host 拼成完整 URL（`entry.uri + ep.uri`）放进返回；**不给就不带 `uri`**（用 `entryId` 启动即可）。
+- 输出里 `appId` / `appName` / `uri` 三个名字由框架占用（同名业务属性会被覆盖）；`host` / `slot` / `entryId` 原样保留。
+
+带自定义属性的例子（不写 `uri`，多带 `order` / `badge` / `meta`）：
+
+```json
+{
+  "host": "example-extensible-host",
+  "slot": "settings.tabs",
+  "entryId": "main",
+  "label": "插件设置面板",
+  "order": 20,
+  "badge": "beta",
+  "meta": { "group": "安全" }
+}
+```
+
+host 侧 `list()` 拿到的这条会带上 `order` / `badge` / `meta` 原值。
+
 #### Host 怎么打开扩展项
 
-`Webos.contributes.list()` 返回的每条记录里 `uri` 是 host 已经替你拼好的完整 URL（`entry.uri + ep.uri`）。
+扩展点若声明了 `uri`，`list()` 返回里的 `uri` 就是 host 替你拼好的完整 URL（`entry.uri + ep.uri`）；没声明则不带 `uri`。
 
 **推荐 host 的做法**：用 `Webos.apps.open(ext.appId, { entryId: ext.entryId, params })` 把扩展项当独立 webos 窗口启动；对于带查询串的 `ep.uri`（如 `?view=settings`），从 `ext.uri` 里解析查询参数转成 `params` 对象传过去：
 
 ```ts
 const exts = await Webos.contributes.list({ host: 'my-host', slot: 'settings.tabs' })
 for (const ext of exts) {
-  const u = new URL(ext.uri, location.origin)
   const params = {}
-  u.searchParams.forEach((v, k) => { params[k] = v })
+  if (ext.uri) {                       // uri 可能没声明
+    const u = new URL(ext.uri, location.origin)
+    u.searchParams.forEach((v, k) => { params[k] = v })
+  }
   await Webos.apps.open(ext.appId, { entryId: ext.entryId, params })
 }
 ```

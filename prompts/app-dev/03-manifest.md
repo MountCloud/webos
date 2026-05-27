@@ -245,6 +245,38 @@ V1.0 计划：handler 强制校验未声明权限的调用。
 
 ---
 
+## contributes 扩展点（可选）
+
+跨应用 UI 嵌入：声明"我能挂进某个 host 应用的某个 slot"，host 用 `Webos.contributes.list({ host, slot })` 拿到所有提供方。
+
+字段规则：
+
+- **固定三件套**（必填）：`host`（被扩展的应用 appId）、`slot`（host 约定的槽名）、`entryId`（点开时启动本应用哪个 entry，须存在于 `entries[]`）。
+- **其余属性随便放**：`label` / `icon` / 以及任何业务自定义字段（如 `order` / `badge` / `meta`），`list()` 会**原样带回**。`label` 不强制。
+- `uri` 给了才解析成完整 URL（`entry.uri + ep.uri`）放进返回，**不给就不带**——host 用 `entryId` 走 `Webos.apps.open` 启动即可。
+- 输出里 `appId` / `appName` / `uri` 三个名字由框架占用，别拿业务属性蹭。
+
+```json
+{
+  "contributes": {
+    "extensionPoints": [
+      {
+        "host": "example-extensible-host",
+        "slot": "settings.tabs",
+        "entryId": "main",
+        "label": "插件设置面板",
+        "order": 20,
+        "badge": "beta"
+      }
+    ]
+  }
+}
+```
+
+完整规范见 [docs/APP_MANIFEST_SPEC.md](../../docs/APP_MANIFEST_SPEC.md) §4.3，host 侧消费见 [docs/HOST_SDK_API.md](../../docs/HOST_SDK_API.md) `Webos.contributes`。
+
+---
+
 ## 实战示例
 
 ### 标准业务应用（单入口 + features）

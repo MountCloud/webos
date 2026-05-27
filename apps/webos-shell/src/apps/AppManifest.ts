@@ -96,19 +96,23 @@ export interface AppContributes {
 }
 
 export interface ExtensionPoint {
+  // ===== 固定字段（框架必填）=====
   // 被扩展的应用 appId（host / extension 之间约定的字符串）
   host: string
   // 槽位名（host / extension 之间约定）
   slot: string
   // 触发时打开本应用哪个 entry（必填）
   entryId: string
-  // 在 host UI 上显示的文字
-  label: string
+  // ===== 业务字段（框架不强制；常用的给出类型方便补全）=====
+  // 给了才解析：相对所选 entry.uri 的子路径，支持 {var} 占位符；不给则 list() 不带 uri
+  uri?: string
+  // host UI 上显示的文字
+  label?: string
   icon?: string
   description?: string
-  // 相对所选 entry.uri 的子路径，支持 {var} 占位符（由 host 传 params 解析）
-  uri?: string
   permissions?: string[]
+  // 业务自定义任意属性，原样透传给 host（list() 会带回）
+  [key: string]: unknown
 }
 
 // ===== 校验 =====
@@ -251,9 +255,7 @@ export function validateManifest(manifest: unknown): AppManifest {
             `${where}.entryId 不存在：${ep.entryId}（应用 entries 里没有这个 id）`,
           )
         }
-        if (typeof ep.label !== 'string' || !ep.label) {
-          throw new AppManifestError(`${where}.label 必填`)
-        }
+        // host / slot / entryId 之外的属性（label / icon / uri / 业务自定义…）一律放行，原样透传
       }
     }
   }

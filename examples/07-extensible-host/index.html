@@ -97,6 +97,24 @@
       color: var(--text-soft);
       margin-top: 4px;
     }
+    .ext-badge {
+      margin-left: auto;
+      padding: 1px 7px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .ext-card-extra {
+      margin-top: 6px;
+      padding-top: 6px;
+      border-top: 1px dashed var(--border);
+      font-size: 11px;
+      color: var(--text-soft);
+      font-family: ui-monospace, "SF Mono", Consolas, monospace;
+      word-break: break-all;
+    }
     button.refresh {
       background: var(--accent);
       color: #fff;
@@ -150,6 +168,9 @@
       try {
         const exts = await window.Webos.contributes.list({ host: HOST, slot: SLOT })
         log(`contributes.list 返回 ${exts.length} 项`)
+        // order 是插件自定义透传来的属性，host 拿它排序
+        exts.sort((a, b) => (Number(a.order) || 0) - (Number(b.order) || 0))
+        log('原始返回：' + JSON.stringify(exts))
 
         if (exts.length === 0) {
           const empty = document.createElement('div')
@@ -176,6 +197,13 @@
           label.className = 'ext-card-label'
           label.textContent = ext.label
           head.appendChild(label)
+          // badge 是插件自定义透传来的属性
+          if (ext.badge) {
+            const badge = document.createElement('span')
+            badge.className = 'ext-badge'
+            badge.textContent = ext.badge
+            head.appendChild(badge)
+          }
           card.appendChild(head)
 
           const from = document.createElement('div')
@@ -190,16 +218,27 @@
             card.appendChild(desc)
           }
 
+          // 把除框架/常用字段外的属性都列出来，证明"插件放什么，host 就拿到什么"
+          const KNOWN = new Set(['appId', 'appName', 'entryId', 'host', 'slot', 'uri', 'label', 'icon', 'description'])
+          const extras = Object.keys(ext).filter((k) => !KNOWN.has(k))
+          if (extras.length) {
+            const meta = document.createElement('div')
+            meta.className = 'ext-card-extra'
+            meta.textContent = '自定义属性：' + extras.map((k) => `${k}=${JSON.stringify(ext[k])}`).join('  ·  ')
+            card.appendChild(meta)
+          }
+
           card.addEventListener('click', async () => {
-            log(`打开扩展：${ext.appId} / ${ext.entryId}（解析后 URL: ${ext.uri}）`)
+            log(`打开扩展：${ext.appId} / ${ext.entryId}（uri: ${ext.uri ?? '无'}）`)
             try {
-              // contributes 返回的是已解析后的完整 URL；把它的查询串透传给 apps.open
-              // 让插件启动时能拿到正确的 view（避开"宿主只知道 URI、apps.open 只吃 entryId/feature/params"的鸿沟）
+              // uri 可能没声明：声明了就把查询串透传给 apps.open（让插件切到对应 view），没声明就按 entry 默认页启动
               const params = {}
-              try {
-                const u = new URL(ext.uri, location.origin)
-                u.searchParams.forEach((v, k) => { params[k] = v })
-              } catch (_) { /* 绝对 URL 解析失败时忽略，按 entry 默认 URL 启动 */ }
+              if (ext.uri) {
+                try {
+                  const u = new URL(ext.uri, location.origin)
+                  u.searchParams.forEach((v, k) => { params[k] = v })
+                } catch (_) { /* 解析失败忽略 */ }
+              }
               await window.Webos.apps.open(ext.appId, {
                 entryId: ext.entryId,
                 params,
